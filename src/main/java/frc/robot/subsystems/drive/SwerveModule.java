@@ -1,11 +1,11 @@
 package frc.robot.subsystems.drive;
 
-import edu.wpi.first.units.Angle;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Unit;
-import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Unit;
+import edu.wpi.first.units.measure.Units;
 import edu.wpi.first.units.Units.*;
-import edu.wpi.first.units.Velocity;
+import edu.wpi.first.units.measure.Velocity;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -40,15 +40,15 @@ public class SwerveModule {
     CANcoder mTurnAbsEncoder;
     StatusSignal<Double> mTurnAbsPositionSignal;
 
-    public static final Measure<Velocity<Angle>> kModuleMaxAngularVelocity = Units.RotationsPerSecond.of(0.5);
+    public static final AngularVelocity kModuleMaxAngularVelocity = Units.RotationsPerSecond.of(0.5);
 
-    public static final Measure<Velocity<Velocity<Angle>>> kModuleMaxAnguularAcceleration = Units.RotationsPerSecond
+    public static final AngularAcceleration kModuleMaxAnguularAcceleration = Units.RotationsPerSecond
             .per(Units.Second).of(1.0);
 
     public SwerveModule(int driveMotorCan,
             int turnMotorCan,
             int turnAbsEncoderCan,
-            Measure<Angle> absEncoderOffset,
+            Angle absEncoderOffset,
             PidConfig turnConfig,
             String name
     ) 
@@ -162,12 +162,12 @@ public class SwerveModule {
     }
 
 
-    public Measure<Angle> GetTurnPosition() {
+    public Angle GetTurnPosition() {
         return Units.Radians.of( mTurnEncoder.getPosition() );
     }
 
-    public Measure<Angle> GetTurnAbsPosition(){
-        Measure<Angle> position = Math.abs(
+    public Angle GetTurnAbsPosition(){
+        Angle position = Math.abs(
             Math.floorMod(
                 mTurnAbsPositionSignal.getValue()
                 + mTurnAbsEncoder
@@ -177,8 +177,8 @@ public class SwerveModule {
         ) - 180;
     }
 
-    public Measure<Angle> GetTurnAbsPositionRaw(){
-        Measure<Angle> position = mTurnAbsPositionSignal.getValue();
+    public Angle GetTurnAbsPositionRaw(){
+        Angle position = mTurnAbsPositionSignal.getValue();
         return position;
     }
 
