@@ -2,8 +2,8 @@ package frc.robot.subsystems.drive;
 
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.measure.Unit;
-import edu.wpi.first.units.measure.Units;
+import edu.wpi.first.units.Unit;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.Units.*;
 import edu.wpi.first.units.measure.Velocity;
 
@@ -16,25 +16,25 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
-import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 
-import com.revrobotics.CANSparkMax;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkPIDController;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.CANSparkBase.IdleMode;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 import frc.robot.Constants;
 
 public class SwerveModule {
     String mName;
 
-    CANSparkMax mDriveMotor;
-    SparkPIDController mDrivePid;
+    SparkMax mDriveMotor;
+    SparkClosedLoopController mDrivePid;
     RelativeEncoder mDriveEncoder;
 
-    CANSparkMax mTurnMotor;
-    SparkPIDController mTurnPid;
+    SparkMax mTurnMotor;
+    SparkClosedLoopController mTurnPid;
     RelativeEncoder mTurnEncoder;
 
     CANcoder mTurnAbsEncoder;
@@ -56,30 +56,32 @@ public class SwerveModule {
     {
         mName = name;
 
-        mDriveMotor = new CANSparkMax(driveMotorCan, MotorType.kBrushless);
-        mDrivePid = mDriveMotor.getPIDController();
+        mDriveMotor = new SparkMax(driveMotorCan, MotorType.kBrushless);
+        mDrivePid = mDriveMotor.getClosedLoopController();
         mDriveEncoder = mDriveMotor.getEncoder();
 
-        mTurnMotor = new CANSparkMax(turnMotorCan, MotorType.kBrushless);
-        mTurnPid = mTurnMotor.getPIDController();
+        mTurnMotor = new SparkMax(turnMotorCan, MotorType.kBrushless);
+        mTurnPid = mTurnMotor.getClosedLoopController();
         mTurnEncoder = mTurnMotor.getEncoder();
 
         mTurnAbsEncoder = new CANcoder(turnAbsEncoderCan);
         mTurnAbsPositionSignal = mTurnAbsEncoder.getAbsolutePosition();
         
+        SparkMaxConfig turnMotorConfig = new SparkMaxConfig();
         // names are diffrent ill try my best to copy! -Weston Justice
-        mTurnMotor.setInverted(true);
+        turnMotorConfig.inverted(true)
+            // Set coast mode so we can straighten the wheels at start of match
+            // Will switch to brake mode later
+            .idleMode(IdleMode.kCoast)
+            .smartCurrentLimit(30);
 
-        // Set coast mode so we can straighten the wheels at start of match
-        // Will switch to brake mode later
-
-        mTurnMotor.setIdleMode(IdleMode.kCoast);
-        mTurnMotor.setSmartCurrentLimit(30);
+        //nulls needed for function... to function
+        mTurnMotor.configure(turnMotorConfig, null, null);
 
         CANcoderConfiguration configCanCoder = new CANcoderConfiguration();
         MagnetSensorConfigs configMagnetSensor = new MagnetSensorConfigs();
         configMagnetSensor
-            .withAbsoluteSensorRange(com.ctre.phoenix6.signals.AbsoluteSensorRangeValue.Signed_PlusMinusHalf)
+            .withAbsoluteSensorDiscontinuityPoint(0.5)
             .withSensorDirection(com.ctre.phoenix6.signals.SensorDirectionValue.CounterClockwise_Positive)
             .withMagnetOffset(0.0);
 
@@ -251,7 +253,7 @@ public class SwerveModule {
     }
 
     public void ResetTurnPosition() {
-        mTurnMotor.SetPosition(GetTurnAbsPosition())
+        mTurnMotor.SetPosition(GetTurnAbsPosition());
     }
 
     public final class PidConfig {
