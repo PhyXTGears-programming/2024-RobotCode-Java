@@ -6,6 +6,8 @@ import edu.wpi.first.units.Unit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.Units.*;
 import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.AngularAcceleration;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -18,16 +20,21 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 
 import frc.robot.Constants;
 
 public class SwerveModule {
     String mName;
+
+    Angle mAbsEncoderOffset;
 
     SparkMax mDriveMotor;
     SparkClosedLoopController mDrivePid;
@@ -38,7 +45,7 @@ public class SwerveModule {
     RelativeEncoder mTurnEncoder;
 
     CANcoder mTurnAbsEncoder;
-    StatusSignal<Double> mTurnAbsPositionSignal;
+    StatusSignal<Angle> mTurnAbsPositionSignal;
 
     public static final AngularVelocity kModuleMaxAngularVelocity = Units.RotationsPerSecond.of(0.5);
 
@@ -75,8 +82,28 @@ public class SwerveModule {
             .idleMode(IdleMode.kCoast)
             .smartCurrentLimit(30);
 
-        //nulls needed for function... to function
-        mTurnMotor.configure(turnMotorConfig, null, null);
+        turnMotorConfig.encoder
+            .positionConversionFactor(
+                2.0 * Math.PI
+                / Constants.Drive.kTrunWheelPerMotorRatio
+            )
+            .velocityConversionFactor(
+                (2.0 * Math.PI / 1.0)
+                / Constants.Drive.kTrunWheelPerMotorRatio
+                * (1.0 / 60.0)
+            );
+
+        turnMotorConfig.closedLoop
+            .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+            .pidf(
+                turnConfig.kP, //SetP
+                turnConfig.kI, //SetI
+                turnConfig.kD, //SetD
+                0.0  //SetFF
+            );
+
+
+        mTurnMotor.configure(turnMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         CANcoderConfiguration configCanCoder = new CANcoderConfiguration();
         MagnetSensorConfigs configMagnetSensor = new MagnetSensorConfigs();
@@ -106,30 +133,29 @@ public class SwerveModule {
 
         }
 
-        // FIXME: Constants have not been set up yet
+        /** FIXME: Constants have not been set up yet
+            Commented out to see if new code works
 
-
-        mTurnEncoder.setPositionConversionFactor(
+            mTurnEncoder.setPositionConversionFactor(
             2.0 * Math.PI
             / Constants.Drive.kTrunWheelPerMotorRatio
         );
 
-        mTurnEncoder.setVelocityConversionFactor(
+            mTurnEncoder.setVelocityConversionFactor(
             (2.0 * Math.PI / 1.0)
             / Constants.Drive.kTrunWheelPerMotorRatio
             * (1.0 / 60.0)
         );
+        */
 
-        mTurnPid.setFeedbackDevice(mTurnEncoder);
-
-        // drive pid parameters
-
+        /** drive pid parameters || Commented out to see if new code works
         mDrivePid.setP(1.0);
         mDrivePid.setI(0.0);
         mDrivePid.setIZone(0.0);
         mDrivePid.setD(0.0);
 
         mDrivePid.setFF(0.0);
+    */
 
         mDriveEncoder.setPosition(0.0);
 
@@ -171,9 +197,7 @@ public class SwerveModule {
     public Angle GetTurnAbsPosition(){
         Angle position = Math.abs(
             Math.floorMod(
-                mTurnAbsPositionSignal.getValue()
-                + mTurnAbsEncoder
-                + 180,
+                mTurnAbsPositionSignal.getValue().plus(mAbsEncoderOffset).plus(Units.Degrees.of(180)),
                 360
             )
         ) - 180;
@@ -238,17 +262,17 @@ public class SwerveModule {
 
         mTurnPid.setReference(
             targetState.angle.getRadians(),
-            com.revrobotics.ControlType.kPosition
+            com.revrobotics.spark.SparkBase.ControlType.kPosition
         );
 
     }
-
-    public void SetTrunBreak(Boolean isEnabled){
+    //SetTrunBreak might be a typo but it might break everything if I fix it
+    public void SetTrunBreak(Boolean isEnabled, SparkMaxConfig turnMotorConfig){
         if(isEnabled){
-            mTurnMotor.setIdleMode(revrobotics.CANSparkMax.IdleMode.kBrake);
+            turnMotorConfig.idleMode(IdleMode.kBrake);
         }
         else{
-            mTurnMotor.setIdleMode(revrobotics.CANSparkMax.IdleMode.kCoast);
+            turnMotorConfig.idleMode(IdleMode.kCoast);
         }
     }
 
@@ -259,6 +283,17 @@ public class SwerveModule {
     public final class PidConfig {
         public double kP = 0.0;
         public double kI = 0.0;
-        public double KD = 0.0;
+        public double kD = 0.0;
+    }
+
+    public double fmod(double a, double b) {
+        b = Math.abs(b);
+        double quotient = a/b;
+        double remainder = quotient - Math.floor(quotient);
+        double answer = remainder * b;
+        if (answer < 0) {
+            answer += b;
+        }
+        return Math.copySign(answer, a);
     }
 }
