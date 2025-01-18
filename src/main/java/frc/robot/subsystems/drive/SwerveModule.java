@@ -54,12 +54,13 @@ public class SwerveModule {
     public static final AngularAcceleration kModuleMaxAnguularAcceleration = Units.RotationsPerSecond
             .per(Units.Second).of(1.0);
 
-    public SwerveModule(int driveMotorCan,
-            int turnMotorCan,
-            int turnAbsEncoderCan,
-            Angle absEncoderOffset,
-            PidConfig turnConfig,
-            String name
+    public SwerveModule(
+        int driveMotorCan,
+        int turnMotorCan,
+        int turnAbsEncoderCan,
+        Angle absEncoderOffset,
+        PidConfig turnConfig,
+        String name
     ) 
     
     {
@@ -294,10 +295,16 @@ public class SwerveModule {
         mTurnEncoder.setPosition(GetTurnAbsPosition().in(Degrees));
     }
 
-    public final class PidConfig {
+    public static final class PidConfig {
         public double kP = 0.0;
         public double kI = 0.0;
         public double kD = 0.0;
+
+        public PidConfig(double p, double i, double d) {
+            kP = p;
+            kI = i;
+            kD = d;
+        }
     }
 
     public double fmod(double a, double b) {
