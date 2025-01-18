@@ -14,6 +14,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -67,6 +69,18 @@ public class SwerveModule {
         mDrivePid = mDriveMotor.getClosedLoopController();
         mDriveEncoder = mDriveMotor.getEncoder();
 
+        SparkMaxConfig driveMotorConfig = new SparkMaxConfig();
+
+        driveMotorConfig.closedLoop
+            .pidf (
+                1.0, //SetP
+                0.0, //SetI
+                0.0, //SetD
+                0.0 //SetFF
+            );
+
+        mDriveMotor.configure(driveMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
         mTurnMotor = new SparkMax(turnMotorCan, MotorType.kBrushless);
         mTurnPid = mTurnMotor.getClosedLoopController();
         mTurnEncoder = mTurnMotor.getEncoder();
@@ -115,7 +129,6 @@ public class SwerveModule {
         configCanCoder.withMagnetSensor(configMagnetSensor);
         
         while (true){
-            // FIXME: will fix code is diffrent in java, if theres a problem check here
             com.ctre.phoenix6.StatusCode sc = mTurnAbsEncoder.getConfigurator().apply(configMagnetSensor, 5.0);
 
             if(sc.isOK()){
@@ -195,12 +208,13 @@ public class SwerveModule {
     }
 
     public Angle GetTurnAbsPosition(){
-        Angle position = Math.abs(
-            Math.floorMod(
-                mTurnAbsPositionSignal.getValue().plus(mAbsEncoderOffset).plus(Units.Degrees.of(180)),
-                360
+        Angle position = Degrees.of(Math.abs(
+            fmod(
+                mTurnAbsPositionSignal.getValue().plus(mAbsEncoderOffset).plus(Units.Degrees.of(180)).in(Degrees),
+                360.0
             )
-        ) - 180;
+        ) - 180.0);
+        return position;
     }
 
     public Angle GetTurnAbsPositionRaw(){
@@ -251,8 +265,8 @@ public class SwerveModule {
 
         // FIXME:
 
-        double drivePercent = Math.clamp(
-            (targetState.speedMetersPerSecond / Constants.kMaxDriveSpeed).value(),
+        double drivePercent = clamp(
+            (targetState.speedMetersPerSecond / Constants.Drive.kMaxDriveSpeed),
             -1.0, 1.0
         );
 
@@ -277,7 +291,7 @@ public class SwerveModule {
     }
 
     public void ResetTurnPosition() {
-        mTurnMotor.SetPosition(GetTurnAbsPosition());
+        mTurnEncoder.setPosition(GetTurnAbsPosition().in(Degrees));
     }
 
     public final class PidConfig {
@@ -295,5 +309,9 @@ public class SwerveModule {
             answer += b;
         }
         return Math.copySign(answer, a);
+    }
+
+    public double clamp(double value, double min, double max) {
+        return Math.max(min, Math.min(max, value));
     }
 }
