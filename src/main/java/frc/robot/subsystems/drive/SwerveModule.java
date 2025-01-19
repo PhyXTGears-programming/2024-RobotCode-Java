@@ -1,54 +1,63 @@
 package frc.robot.subsystems.drive;
 
-import edu.wpi.first.units.Angle;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Unit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.Units.*;
-import edu.wpi.first.units.Velocity;
+import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.AngularAcceleration;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
-import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 
-import com.revrobotics.CANSparkMax;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkPIDController;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.CANSparkBase.IdleMode;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 
 import frc.robot.Constants;
 
 public class SwerveModule {
     String mName;
 
-    CANSparkMax mDriveMotor;
-    SparkPIDController mDrivePid;
+    Angle mAbsEncoderOffset;
+
+    SparkMax mDriveMotor;
+    SparkClosedLoopController mDrivePid;
     RelativeEncoder mDriveEncoder;
 
-    CANSparkMax mTurnMotor;
-    SparkPIDController mTurnPid;
+    SparkMax mTurnMotor;
+    SparkClosedLoopController mTurnPid;
     RelativeEncoder mTurnEncoder;
 
     CANcoder mTurnAbsEncoder;
-    StatusSignal<Double> mTurnAbsPositionSignal;
+    StatusSignal<Angle> mTurnAbsPositionSignal;
 
-    public static final Measure<Velocity<Angle>> kModuleMaxAngularVelocity = Units.RotationsPerSecond.of(0.5);
+    public static final AngularVelocity kModuleMaxAngularVelocity = Units.RotationsPerSecond.of(0.5);
 
-    public static final Measure<Velocity<Velocity<Angle>>> kModuleMaxAnguularAcceleration = Units.RotationsPerSecond
+    public static final AngularAcceleration kModuleMaxAnguularAcceleration = Units.RotationsPerSecond
             .per(Units.Second).of(1.0);
 
     public SwerveModule(int driveMotorCan,
             int turnMotorCan,
             int turnAbsEncoderCan,
-            Measure<Angle> absEncoderOffset,
+            Angle absEncoderOffset,
             PidConfig turnConfig,
             String name
     ) 
@@ -56,37 +65,70 @@ public class SwerveModule {
     {
         mName = name;
 
-        mDriveMotor = new CANSparkMax(driveMotorCan, MotorType.kBrushless);
-        mDrivePid = mDriveMotor.getPIDController();
+        mDriveMotor = new SparkMax(driveMotorCan, MotorType.kBrushless);
+        mDrivePid = mDriveMotor.getClosedLoopController();
         mDriveEncoder = mDriveMotor.getEncoder();
 
-        mTurnMotor = new CANSparkMax(turnMotorCan, MotorType.kBrushless);
-        mTurnPid = mTurnMotor.getPIDController();
+        SparkMaxConfig driveMotorConfig = new SparkMaxConfig();
+
+        driveMotorConfig.closedLoop
+            .pidf (
+                1.0, //SetP
+                0.0, //SetI
+                0.0, //SetD
+                0.0 //SetFF
+            );
+
+        mDriveMotor.configure(driveMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+        mTurnMotor = new SparkMax(turnMotorCan, MotorType.kBrushless);
+        mTurnPid = mTurnMotor.getClosedLoopController();
         mTurnEncoder = mTurnMotor.getEncoder();
 
         mTurnAbsEncoder = new CANcoder(turnAbsEncoderCan);
         mTurnAbsPositionSignal = mTurnAbsEncoder.getAbsolutePosition();
         
+        SparkMaxConfig turnMotorConfig = new SparkMaxConfig();
         // names are diffrent ill try my best to copy! -Weston Justice
-        mTurnMotor.setInverted(true);
+        turnMotorConfig.inverted(true)
+            // Set coast mode so we can straighten the wheels at start of match
+            // Will switch to brake mode later
+            .idleMode(IdleMode.kCoast)
+            .smartCurrentLimit(30);
 
-        // Set coast mode so we can straighten the wheels at start of match
-        // Will switch to brake mode later
+        turnMotorConfig.encoder
+            .positionConversionFactor(
+                2.0 * Math.PI
+                / Constants.Drive.kTrunWheelPerMotorRatio
+            )
+            .velocityConversionFactor(
+                (2.0 * Math.PI / 1.0)
+                / Constants.Drive.kTrunWheelPerMotorRatio
+                * (1.0 / 60.0)
+            );
 
-        mTurnMotor.setIdleMode(IdleMode.kCoast);
-        mTurnMotor.setSmartCurrentLimit(30);
+        turnMotorConfig.closedLoop
+            .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+            .pidf(
+                turnConfig.kP, //SetP
+                turnConfig.kI, //SetI
+                turnConfig.kD, //SetD
+                0.0  //SetFF
+            );
+
+
+        mTurnMotor.configure(turnMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         CANcoderConfiguration configCanCoder = new CANcoderConfiguration();
         MagnetSensorConfigs configMagnetSensor = new MagnetSensorConfigs();
         configMagnetSensor
-            .withAbsoluteSensorRange(com.ctre.phoenix6.signals.AbsoluteSensorRangeValue.Signed_PlusMinusHalf)
+            .withAbsoluteSensorDiscontinuityPoint(0.5)
             .withSensorDirection(com.ctre.phoenix6.signals.SensorDirectionValue.CounterClockwise_Positive)
             .withMagnetOffset(0.0);
 
         configCanCoder.withMagnetSensor(configMagnetSensor);
         
         while (true){
-            // FIXME: will fix code is diffrent in java, if theres a problem check here
             com.ctre.phoenix6.StatusCode sc = mTurnAbsEncoder.getConfigurator().apply(configMagnetSensor, 5.0);
 
             if(sc.isOK()){
@@ -104,30 +146,29 @@ public class SwerveModule {
 
         }
 
-        // FIXME: Constants have not been set up yet
+        /** FIXME: Constants have not been set up yet
+            Commented out to see if new code works
 
-
-        mTurnEncoder.setPositionConversionFactor(
+            mTurnEncoder.setPositionConversionFactor(
             2.0 * Math.PI
             / Constants.Drive.kTrunWheelPerMotorRatio
         );
 
-        mTurnEncoder.setVelocityConversionFactor(
+            mTurnEncoder.setVelocityConversionFactor(
             (2.0 * Math.PI / 1.0)
             / Constants.Drive.kTrunWheelPerMotorRatio
             * (1.0 / 60.0)
         );
+        */
 
-        mTurnPid.setFeedbackDevice(mTurnEncoder);
-
-        // drive pid parameters
-
+        /** drive pid parameters || Commented out to see if new code works
         mDrivePid.setP(1.0);
         mDrivePid.setI(0.0);
         mDrivePid.setIZone(0.0);
         mDrivePid.setD(0.0);
 
         mDrivePid.setFF(0.0);
+    */
 
         mDriveEncoder.setPosition(0.0);
 
@@ -162,23 +203,22 @@ public class SwerveModule {
     }
 
 
-    public Measure<Angle> GetTurnPosition() {
+    public Angle GetTurnPosition() {
         return Units.Radians.of( mTurnEncoder.getPosition() );
     }
 
-    public Measure<Angle> GetTurnAbsPosition(){
-        Measure<Angle> position = Math.abs(
-            Math.floorMod(
-                mTurnAbsPositionSignal.getValue()
-                + mTurnAbsEncoder
-                + 180,
-                360
+    public Angle GetTurnAbsPosition(){
+        Angle position = Degrees.of(Math.abs(
+            fmod(
+                mTurnAbsPositionSignal.getValue().plus(mAbsEncoderOffset).plus(Units.Degrees.of(180)).in(Degrees),
+                360.0
             )
-        ) - 180;
+        ) - 180.0);
+        return position;
     }
 
-    public Measure<Angle> GetTurnAbsPositionRaw(){
-        Measure<Angle> position = mTurnAbsPositionSignal.getValue();
+    public Angle GetTurnAbsPositionRaw(){
+        Angle position = mTurnAbsPositionSignal.getValue();
         return position;
     }
 
@@ -225,8 +265,8 @@ public class SwerveModule {
 
         // FIXME:
 
-        double drivePercent = Math.clamp(
-            (targetState.speedMetersPerSecond / Constants.kMaxDriveSpeed).value(),
+        double drivePercent = clamp(
+            (targetState.speedMetersPerSecond / Constants.Drive.kMaxDriveSpeed),
             -1.0, 1.0
         );
 
@@ -236,27 +276,42 @@ public class SwerveModule {
 
         mTurnPid.setReference(
             targetState.angle.getRadians(),
-            com.revrobotics.ControlType.kPosition
+            com.revrobotics.spark.SparkBase.ControlType.kPosition
         );
 
     }
-
-    public void SetTrunBreak(Boolean isEnabled){
+    //SetTrunBreak might be a typo but it might break everything if I fix it
+    public void SetTrunBreak(Boolean isEnabled, SparkMaxConfig turnMotorConfig){
         if(isEnabled){
-            mTurnMotor.setIdleMode(revrobotics.CANSparkMax.IdleMode.kBrake);
+            turnMotorConfig.idleMode(IdleMode.kBrake);
         }
         else{
-            mTurnMotor.setIdleMode(revrobotics.CANSparkMax.IdleMode.kCoast);
+            turnMotorConfig.idleMode(IdleMode.kCoast);
         }
     }
 
     public void ResetTurnPosition() {
-        mTurnMotor.SetPosition(GetTurnAbsPosition())
+        mTurnEncoder.setPosition(GetTurnAbsPosition().in(Degrees));
     }
 
     public final class PidConfig {
         public double kP = 0.0;
         public double kI = 0.0;
-        public double KD = 0.0;
+        public double kD = 0.0;
+    }
+
+    public double fmod(double a, double b) {
+        b = Math.abs(b);
+        double quotient = a/b;
+        double remainder = quotient - Math.floor(quotient);
+        double answer = remainder * b;
+        if (answer < 0) {
+            answer += b;
+        }
+        return Math.copySign(answer, a);
+    }
+
+    public double clamp(double value, double min, double max) {
+        return Math.max(min, Math.min(max, value));
     }
 }
