@@ -1,5 +1,6 @@
 package frc.robot.subsystems.drive;
 
+
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Unit;
@@ -176,7 +177,7 @@ public class SwerveModule {
             mTurnAbsPositionSignal.waitForUpdate(5.0);
 
             com.ctre.phoenix6.StatusCode sc = mTurnAbsPositionSignal.getStatus();
-
+            
             if(sc.isOK()){
                 break;
             }
@@ -201,7 +202,7 @@ public class SwerveModule {
     public void Periodic(){
         mTurnAbsPositionSignal.refresh();
     }
-
+    
 
     public Angle GetTurnPosition() {
         return Units.Radians.of( mTurnEncoder.getPosition() );
@@ -221,14 +222,14 @@ public class SwerveModule {
         Angle position = mTurnAbsPositionSignal.getValue();
         return position;
     }
-
+    
     public SwerveModulePosition GetPosition(){
         return new SwerveModulePosition(
             mDriveEncoder.getPosition(),
             Rotation2d.fromRadians(GetTurnPosition().in(Units.Radians))
         );
-    }
-
+    } 
+    
     public SwerveModuleState GetState() {
         return new SwerveModuleState(
             mDriveEncoder.getVelocity(),
@@ -239,7 +240,7 @@ public class SwerveModule {
     public void UpdateDashboard() {
         // TODO:
     }
-
+    
 
     public void SetDesiredState(
         SwerveModuleState desiredState
