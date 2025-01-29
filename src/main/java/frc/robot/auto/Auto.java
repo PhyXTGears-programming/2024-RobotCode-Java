@@ -16,27 +16,27 @@ import frc.robot.math.Vector;
 import frc.robot.subsystems.drive.Drivetrain;
 
 public class Auto {
-    public ArrayList<Pose2d> loadPosePathFromJSON(/* FIXME: add json loader */ Object path) {
+    public static ArrayList<Pose2d> loadPosePathFromJSON(/* FIXME: add json loader */ Object path) {
         return new ArrayList();
     }
 
-    public ArrayList<PathPoint> loadPathFromJSON(/* FIXME: add json loader */ Object path, SubsystemRegistry registry) {
+    public static ArrayList<PathPoint> loadPathFromJSON(/* FIXME: add json loader */ Object path, SubsystemRegistry registry) {
         return new ArrayList();
     }
 
-    public Command loadPoseFollowCommandFromFile(Drivetrain drivetrain, String filename) {
+    public static Command loadPoseFollowCommandFromFile(Drivetrain drivetrain, String filename) {
         // FIXME
         return new RunCommand(() -> {
         });
     }
 
-    public Command loadPathFollowCommandFromFile(String filename, SubsystemRegistry registry) {
+    public static Command loadPathFollowCommandFromFile(String filename, SubsystemRegistry registry) {
         // FIXME
         return new RunCommand(() -> {
         });
     }
 
-    public Command generatePathFollowCommand(
+    public static Command generatePathFollowCommand(
         ArrayList<Pose2d> pose,
         LinearVelocity speed,
         Drivetrain drivetrain
@@ -64,7 +64,7 @@ public class Auto {
                 drivetrain);
     }
 
-    public Command generatePathFollowCommand(
+    public static Command generatePathFollowCommand(
             ArrayList<PathPoint> path,
             Drivetrain drivetrain) {
         var currentPoseIndex = new Object() {
@@ -94,7 +94,7 @@ public class Auto {
                 drivetrain);
     }
 
-    public Command moveBackwardsCommand(Drivetrain drivetrain) {
+    public static Command moveBackwardsCommand(Drivetrain drivetrain) {
         ArrayList<Pose2d> path = new ArrayList<Pose2d>();
 
         path.add(new Pose2d(Units.Meters.of(-0.0), Units.Meters.of(0.0), Rotation2d.fromRadians(0.0)));
@@ -117,7 +117,7 @@ public class Auto {
         return generatePathFollowCommand(path, Units.MetersPerSecond.of(1.0), drivetrain);
     }
 
-    public Command moveForwardsCommand(Drivetrain drivetrain) {
+    public static Command moveForwardsCommand(Drivetrain drivetrain) {
         ArrayList<Pose2d> path = new ArrayList<Pose2d>();
         path.add(new Pose2d(Units.Meters.of(0.0), Units.Meters.of(0.0), Rotation2d.fromRadians(0.0)));
         path.add(new Pose2d(Units.Meters.of(0.1), Units.Meters.of(0.0), Rotation2d.fromRadians(0.0)));
