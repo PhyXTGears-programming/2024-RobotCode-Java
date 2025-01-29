@@ -1,4 +1,4 @@
-package frc.auto;
+package frc.robot.auto;
 
 import java.util.ArrayList;
 
@@ -11,8 +11,8 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import frc.auto.load.SubsystemRegistry;
-import frc.math.Vector;
+import frc.robot.auto.load.SubsystemRegistry;
+import frc.robot.math.Vector;
 import frc.robot.subsystems.drive.Drivetrain;
 
 public class Auto {

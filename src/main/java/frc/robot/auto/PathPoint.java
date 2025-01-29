@@ -1,12 +1,12 @@
-package frc.auto;
+package frc.robot.auto;
 
 import java.util.Optional;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Velocity;
+import edu.wpi.first.units.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class PathPoint {
