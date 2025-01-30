@@ -1,4 +1,4 @@
-package frc.math;
+package frc.robot.math;
 
 public class Point {
     public double x;
