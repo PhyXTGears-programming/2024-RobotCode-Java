@@ -5,8 +5,7 @@ import java.util.Optional;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.LinearVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class PathPoint {
@@ -15,15 +14,15 @@ public class PathPoint {
         Halt,
     }
 
-    private Measure<Distance> mX;
-    private Measure<Distance> mY;
+    private Distance mX;
+    private Distance mY;
     private Rotation2d mRotation;
-    private Measure<Velocity<Distance>> mVelocity; 
+    private LinearVelocity mVelocity; 
     private PathPointType mType;
 
     private Optional<Command> mCommand;
 
-    public PathPoint(Measure<Distance> x, Measure<Distance> y, Rotation2d rotation,Measure<Velocity<Distance>> velocity) {
+    public PathPoint(Distance x, Distance y, Rotation2d rotation, LinearVelocity velocity) {
     }
 
     public PathPoint setCommand(Command command) {
@@ -41,11 +40,11 @@ public class PathPoint {
            return this;
     }
 
-    public Measure<Distance> getX() {
+    public Distance getX() {
         return mX;
     }
 
-    public Measure<Distance> getY() {
+    public Distance getY() {
         return mY;
     }
 
@@ -57,7 +56,7 @@ public class PathPoint {
         return mRotation;
     }
 
-    public Measure<Velocity<Distance>> getVelocity() {
+    public LinearVelocity getVelocity() {
         return mVelocity;
     }
 
