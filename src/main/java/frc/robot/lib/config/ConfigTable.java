@@ -8,5 +8,5 @@ public interface ConfigTable {
      * @param String name - name of field in table (ex: "speed.min")
      * @return Optional in case config is missing a field with the specified name, or unable to convert string in config into a double.  Might need a Result type to indicate missing vs bad value.
      */
-    Optional<double> getDouble(String name);
+    Optional<Double> getDouble(String name);
 }
