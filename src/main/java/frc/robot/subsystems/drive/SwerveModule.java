@@ -250,25 +250,23 @@ public class SwerveModule {
 
         // opitmize the reference state to avoid spinning further than 90 deg
 
-        SwerveModuleState targetState = SwerveModuleState.optimize(
-            desiredState, encoderRotation
-        );
+        desiredState.optimize(encoderRotation);
 
-        //  scale speed by cosine of angel error this scales down movement
+        //  scale speed by cosine of angle error this scales down movement
         //  perpendicular to the desired direction of travel that can occur when
         //  modules change directions. this results in smoother driving
 
         // FIXME:
         // I do not know how rotation2d works
 
-        targetState.speedMetersPerSecond *= (encoderRotation.minus(targetState.angle)).getCos();
+        desiredState.speedMetersPerSecond *= (encoderRotation.minus(desiredState.angle)).getCos();
 
         // Set drive speed percent.
 
         // FIXME:
 
         double drivePercent = clamp(
-            (targetState.speedMetersPerSecond / Constants.Drive.kMaxDriveSpeed),
+            (desiredState.speedMetersPerSecond / Constants.Drive.kMaxDriveSpeedMetersPerSecond),
             -1.0, 1.0
         );
 
@@ -277,7 +275,7 @@ public class SwerveModule {
         // this has been marked for removel
 
         mTurnPid.setReference(
-            targetState.angle.getRadians(),
+            desiredState.angle.getRadians(),
             com.revrobotics.spark.SparkBase.ControlType.kPosition
         );
 

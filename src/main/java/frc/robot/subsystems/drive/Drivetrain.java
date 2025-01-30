@@ -4,32 +4,26 @@ import static edu.wpi.first.units.Units.Degrees;
 
 import java.util.Optional;
 
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.studica.frc.AHRS;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.Kinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.system.Discretization;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.math.Point;
+import frc.robot.Constants;
 import frc.robot.Interface;
 import frc.robot.lib.config.ConfigTable;
 import frc.robot.subsystems.drive.SwerveModule.PidConfig;
@@ -252,15 +246,20 @@ public class Drivetrain extends SubsystemBase {
             : new ChassisSpeeds(forwardSpeed, strafeSpeed, turnSpeed);
         
         SwerveModuleState[] states = mKinematics.toSwerveModuleStates(
-        ChassisSpeeds.discretize(chassisSpeeds, period.magnitude())
+            ChassisSpeeds.discretize(chassisSpeeds, period.magnitude())
         );
 
-        mKinematics.desaturateWheelSpeeds(states, kMaxDriveSpeed);
+        SwerveDriveKinematics.desaturateWheelSpeeds(states, Constants.Drive.kMaxDriveSpeedMetersPerSecond);
 
         SwerveModuleState fl = states[0];
         SwerveModuleState fr = states[1];
         SwerveModuleState bl = states[2];
         SwerveModuleState br = states[3];
+
+        mFrontLeft.SetDesiredState(fl);
+        mFrontRight.SetDesiredState(fr);
+        mBackLeft.SetDesiredState(bl);
+        mBackRight.SetDesiredState(br);
 
     }  
 
@@ -338,7 +337,10 @@ public class Drivetrain extends SubsystemBase {
 
     public Point getChassisPosition() {
         Translation2d translation = mOdometry.getPoseMeters().getTranslation();
-        return Point(translation.getMeasureX(), translation.getMeasureY());
+        return new Point(
+            translation.getMeasureX().in(Units.Meters), 
+            translation.getMeasureY().in(Units.Meters)
+        );
     }
 
     public static SwerveModulePosition getModulePosition(Translation2d pos) {
