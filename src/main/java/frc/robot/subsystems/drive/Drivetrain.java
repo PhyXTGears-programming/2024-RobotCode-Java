@@ -304,7 +304,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public Angle getHeading() {
-        return Degrees.of(mGyro.getYaw()).plus(mGyroOffset).unaryMinus(); //FIXMEs
+        return Degrees.of(mGyro.getYaw()).plus(mGyroOffset).unaryMinus(); 
     }
 
     public void updateOdometry() {
@@ -317,23 +317,39 @@ public class Drivetrain extends SubsystemBase {
             mBackLeft.GetPosition(),
             mBackRight.GetPosition(),
             }
-            
-
-            
         );
-
-        
-
     }
-
 
     public void resetPosition() {
-        new Pose2d(0, 0, new Rotation2d(0)); 
+        mOdometry.resetPosition(
+            new Rotation2d(getHeading()),
+            new SwerveModulePosition[] {
+                mFrontLeft.GetPosition(),
+                mFrontRight.GetPosition(),
+                mBackLeft.GetPosition(),
+                mBackRight.GetPosition(),
+            },
+            new Pose2d(0, 0, new Rotation2d(0))
+        );
     }
 
-    public void setPosition(Angle heading, Pose2d toPose) {}
+    public void setPosition(Angle heading, Pose2d toPose) {
+        mOdometry.resetPosition(
+            new Rotation2d(heading), 
+            new SwerveModulePosition[]{
+                mFrontLeft.GetPosition(),
+                mFrontRight.GetPosition(),
+                mBackLeft.GetPosition(),
+                mBackRight.GetPosition(),
+            },
+            toPose
+        );
 
-    public void setPose(Pose2d toPose) {}
+    }
+
+    public void setPose(Pose2d toPose) {
+        setPosition(getHeading(), toPose);
+    }
 
     public Point getChassisPosition() {
         Translation2d translation = mOdometry.getPoseMeters().getTranslation();
