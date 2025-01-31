@@ -16,8 +16,21 @@ import frc.robot.math.Vector;
 import frc.robot.subsystems.drive.Drivetrain;
 
 public class Auto {
-    public static ArrayList<Pose2d> loadPosePathFromJSON(/* FIXME: add json loader */ Object path) {
-        return new ArrayList();
+    public static ArrayList<Pose2d> loadPosePathFromJSON(JSONArray json) {
+            ArrayList<Pose2d> path = new ArrayList();
+            
+            for (int i = 0; i < json.length(); i ++) {
+                JSONObject pathPoint = json.getJSONObject(i);
+                double x = pathPoint.getDouble("x");
+                double y = pathPoint.getDouble("y");
+                double rot = pathPoint.getDouble("rot");
+    
+                Pose2d pose = new Pose2d(Units.Meters.of(x), Units.Meters.of(y), Rotation2d.fromRadians(rot));
+    
+                path.add(pose);
+        }
+
+        return path;
     }
 
     public static ArrayList<PathPoint> loadPathFromJSON(/* FIXME: add json loader */ Object path, SubsystemRegistry registry) {
