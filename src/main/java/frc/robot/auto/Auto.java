@@ -33,8 +33,38 @@ public class Auto {
         return path;
     }
 
-    public static ArrayList<PathPoint> loadPathFromJSON(/* FIXME: add json loader */ Object path, SubsystemRegistry registry) {
-        return new ArrayList();
+    public static ArrayList<PathPoint> loadPathFromJSON(JSONArray json, SubsystemRegistry registry) {
+        ArrayList<PathPoint> path = new ArrayList();
+
+        for(int i = 0; i < json.length(); i ++) {
+            JSONObject pathPoint = json.getJSONObject(i);
+            
+            double x = pathPoint.getDouble("x");
+            double y = pathPoint.getDouble("y");
+            double rot = pathPoint.getDouble("rot");
+            double vel = pathPoint.getDouble("vel");
+
+            PathPointType pointType = PathPointType.Run;
+            if ("stop" == pathPoint.getString("type")) {
+                pointType = PathPointType.Halt;
+            }
+            
+            PathPoint point = new PathPoint(Units.Meters.of(x), Units.Meters.of(y), Rotation2d.fromRadians(rot), Units.MetersPerSecond.of(vel));
+            
+            point.setType(pointType);
+
+            if (pathPoint.has("commands")) {
+                JSONObject commands = pathPoint.getJSONObject("commands");
+
+                if (pathPoint.has("rootNode")) {
+                    JSONObject command = commands.getJSONObject("rootNode");
+
+                    point.setCommand(command);
+                }
+            }
+            path.add(point);
+        }
+        return path;
     }
 
     public static Command loadPoseFollowCommandFromFile(Drivetrain drivetrain, String filename) {
