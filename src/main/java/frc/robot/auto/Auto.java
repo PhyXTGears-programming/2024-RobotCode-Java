@@ -68,9 +68,22 @@ public class Auto {
     }
 
     public static Command loadPoseFollowCommandFromFile(Drivetrain drivetrain, String filename) {
-        // FIXME
-        return new RunCommand(() -> {
-        });
+        System.out.println(" Robot: Building path for auto from " + filename);
+
+        try{ 
+            String file = Files.readString(Paths.get(filename));
+            JSONArray json = new JSONArray(file);
+
+            ArrayList<Pose2d> path = loadPosePathFromJSON(json);
+            System.out.println("Robot: Auto path loaded from " + filename);
+            
+            return generatePathFollowCommand(path, Units.MetersPerSecond.of(1.5), drivetrain);
+        
+        } catch (IOException e ) {
+            System.err.println("Error: Robot: Unable to load path json");
+            return Commands.none();
+        }
+
     }
 
     public static Command loadPathFollowCommandFromFile(String filename, SubsystemRegistry registry) {
