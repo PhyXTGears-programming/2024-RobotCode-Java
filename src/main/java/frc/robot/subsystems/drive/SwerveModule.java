@@ -55,12 +55,13 @@ public class SwerveModule {
     public static final AngularAcceleration kModuleMaxAnguularAcceleration = Units.RotationsPerSecond
             .per(Units.Second).of(1.0);
 
-    public SwerveModule(int driveMotorCan,
-            int turnMotorCan,
-            int turnAbsEncoderCan,
-            Angle absEncoderOffset,
-            PidConfig turnConfig,
-            String name
+    public SwerveModule(
+        int driveMotorCan,
+        int turnMotorCan,
+        int turnAbsEncoderCan,
+        Angle absEncoderOffset,
+        PidConfig turnConfig,
+        String name
     ) 
     
     {
@@ -249,25 +250,23 @@ public class SwerveModule {
 
         // opitmize the reference state to avoid spinning further than 90 deg
 
-        SwerveModuleState targetState = SwerveModuleState.optimize(
-            desiredState, encoderRotation
-        );
+        desiredState.optimize(encoderRotation);
 
-        //  scale speed by cosine of angel error this scales down movement
+        //  scale speed by cosine of angle error this scales down movement
         //  perpendicular to the desired direction of travel that can occur when
         //  modules change directions. this results in smoother driving
 
         // FIXME:
         // I do not know how rotation2d works
 
-        targetState.speedMetersPerSecond *= (encoderRotation.minus(targetState.angle)).getCos();
+        desiredState.speedMetersPerSecond *= (encoderRotation.minus(desiredState.angle)).getCos();
 
         // Set drive speed percent.
 
         // FIXME:
 
         double drivePercent = clamp(
-            (targetState.speedMetersPerSecond / Constants.Drive.kMaxDriveSpeed),
+            (desiredState.speedMetersPerSecond / Constants.Drive.kMaxDriveSpeedMetersPerSecond),
             -1.0, 1.0
         );
 
@@ -276,7 +275,7 @@ public class SwerveModule {
         // this has been marked for removel
 
         mTurnPid.setReference(
-            targetState.angle.getRadians(),
+            desiredState.angle.getRadians(),
             com.revrobotics.spark.SparkBase.ControlType.kPosition
         );
 
@@ -295,10 +294,16 @@ public class SwerveModule {
         mTurnEncoder.setPosition(GetTurnAbsPosition().in(Degrees));
     }
 
-    public final class PidConfig {
+    public static final class PidConfig {
         public double kP = 0.0;
         public double kI = 0.0;
         public double kD = 0.0;
+
+        public PidConfig(double p, double i, double d) {
+            kP = p;
+            kI = i;
+            kD = d;
+        }
     }
 
     public double fmod(double a, double b) {
