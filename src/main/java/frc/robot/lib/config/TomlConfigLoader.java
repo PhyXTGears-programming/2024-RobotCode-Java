@@ -1,5 +1,10 @@
 package frc.robot.lib.config;
 
+import java.io.IOError;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 import org.tomlj.Toml;
 import org.tomlj.TomlParseResult;
@@ -16,9 +21,15 @@ public class TomlConfigLoader implements ConfigLoader {
 
     @Override
     public void openConfig() {
-        TomlParseResult result = Toml.parse(mConfigFile);
-        result.errors().forEach(error -> System.err.println(error.toString()));
-        mToml = result;
+        try {
+            String file = Files.readString(Path.of(mConfigFile));
+            TomlParseResult result = Toml.parse(file);
+            result.errors().forEach(error -> System.err.println(error.toString()));
+            mToml = result;
+        } catch (Exception ex) {
+            System.err.println("Error: unable to read config.toml at " + mConfigFile);
+            System.exit(1);
+        }
     }
 
     @Override
