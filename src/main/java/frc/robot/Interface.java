@@ -15,21 +15,21 @@ public class Interface {
     }
 
     public class Drive {
-        static final int kBackRightDrive = Ports.kCAN_01;
-        static final int kBackRightTurn = Ports.kCAN_05;
-        static final int kBackRightEncoder = Ports.kCAN_21;
+        public static final int kBackRightDrive = Ports.kCAN_01;
+        public static final int kBackRightTurn = Ports.kCAN_05;
+        public static final int kBackRightEncoder = Ports.kCAN_21;
 
-        static final int kFrontRightDrive = Ports.kCAN_02;
-        static final int kFrontRightTurn = Ports.kCAN_06;
-        static final int kFrontRightEncoder = Ports.kCAN_22;
+        public static final int kFrontRightDrive = Ports.kCAN_02;
+        public static final int kFrontRightTurn = Ports.kCAN_06;
+        public static final int kFrontRightEncoder = Ports.kCAN_22;
 
-        static final int kBackLeftDrive = Ports.kCAN_03;
-        static final int kBackLeftTurn = Ports.kCAN_07;
-        static final int kBackLeftEncoder = Ports.kCAN_23;
+        public static final int kBackLeftDrive = Ports.kCAN_03;
+        public static final int kBackLeftTurn = Ports.kCAN_07;
+        public static final int kBackLeftEncoder = Ports.kCAN_23;
 
-        static final int kFrontLeftDrive = Ports.kCAN_04;
-        static final int kFrontLeftTurn = Ports.kCAN_08;
-        static final int kFrontLeftEncoder = Ports.kCAN_24;
+        public static final int kFrontLeftDrive = Ports.kCAN_04;
+        public static final int kFrontLeftTurn = Ports.kCAN_08;
+        public static final int kFrontLeftEncoder = Ports.kCAN_24;
     }
 
     public class Intake {
