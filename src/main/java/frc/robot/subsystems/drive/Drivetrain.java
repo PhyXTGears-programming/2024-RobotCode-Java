@@ -231,7 +231,7 @@ public class Drivetrain extends SubsystemBase {
             : new ChassisSpeeds(forwardSpeed, strafeSpeed, turnSpeed);
         
         SwerveModuleState[] states = mKinematics.toSwerveModuleStates(
-            ChassisSpeeds.discretize(chassisSpeeds, period.magnitude())
+            ChassisSpeeds.discretize(chassisSpeeds, period.in(Seconds))
         );
 
         SwerveDriveKinematics.desaturateWheelSpeeds(states, Constants.Drive.kMaxDriveSpeedMetersPerSecond);
