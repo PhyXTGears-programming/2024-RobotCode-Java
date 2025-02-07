@@ -2,7 +2,6 @@ package frc.robot.auto;
 
 import java.util.Optional;
 
-import org.json.JSONObject;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -27,7 +26,7 @@ public class PathPoint {
     public PathPoint(Distance x, Distance y, Rotation2d rotation, LinearVelocity velocity) {
     }
 
-    public PathPoint setCommand(JSONObject command) {
+    public PathPoint setCommand(Command command) {
         mCommand = Optional.of(command);
         return this;
     }
