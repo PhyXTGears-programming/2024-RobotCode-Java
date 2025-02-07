@@ -32,7 +32,7 @@ import frc.robot.Constants;
 public class SwerveModule {
     String mName;
 
-    Angle mAbsEncoderOffset;
+    Angle mAbsEncoderOffset = Degrees.zero();
 
     SparkMax mDriveMotor;
     SparkClosedLoopController mDrivePid;
@@ -59,6 +59,8 @@ public class SwerveModule {
         String name
     ) {
         mName = name;
+
+        mAbsEncoderOffset = absEncoderOffset;
 
         mDriveMotor = new SparkMax(driveMotorCan, MotorType.kBrushless);
         mDrivePid = mDriveMotor.getClosedLoopController();
