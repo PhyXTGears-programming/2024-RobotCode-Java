@@ -234,7 +234,13 @@ public class FollowPath extends Command {
 
     @Override
     public void end(boolean isInterrupted) {
-
+        mDrivetrain.Drive(
+            Units.MetersPerSecond.of(0),
+            Units.MetersPerSecond.of(0),
+            Units.RadiansPerSecond.of(0),
+            true,
+            Milliseconds.of(20)
+        );
     }
 
     @Override
