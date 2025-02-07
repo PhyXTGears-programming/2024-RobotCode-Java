@@ -135,7 +135,7 @@ public class Drivetrain extends SubsystemBase {
                 throw new Error("error");
             }
 
-            mBackLeft = new SwerveModule(
+            mFrontRight = new SwerveModule(
                 Interface.Drive.kFrontRightDrive,
                 Interface.Drive.kFrontRightTurn,
                 Interface.Drive.kFrontRightEncoder,
