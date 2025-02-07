@@ -183,7 +183,7 @@ public class Drivetrain extends SubsystemBase {
             }
         }
 
-        resetGyro();
+        zeroGyro();
 
         mOdometry = new SwerveDriveOdometry(
             mKinematics,
@@ -280,7 +280,7 @@ public class Drivetrain extends SubsystemBase {
         mIsFieldOriented = !mIsFieldOriented;
     }
 
-    public void resetGyro() {
+    public void zeroGyro() {
         mGyroOffset = Degrees.of(mGyro.getYaw()).unaryMinus();
     }
 
