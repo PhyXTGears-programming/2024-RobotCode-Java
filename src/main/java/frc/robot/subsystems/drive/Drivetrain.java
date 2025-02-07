@@ -29,23 +29,23 @@ import frc.robot.lib.config.ConfigTable;
 import frc.robot.subsystems.drive.SwerveModule.PidConfig;
 
 public class Drivetrain extends SubsystemBase {
-
-    private Translation2d mFrontLeftLocation = new Translation2d(Units.Meters.of(+0.287), Units.Meters.of(+0.287));
-    private Translation2d mFrontRightLocation = new Translation2d(Units.Meters.of(+0.287), Units.Meters.of(-0.287));
-    private Translation2d mBackLeftLocation = new Translation2d(Units.Meters.of(-0.287), Units.Meters.of(+0.287));
-    private Translation2d mBackRightLocation = new Translation2d(Units.Meters.of(-0.287), Units.Meters.of(-0.287));
     
     private SwerveModule mFrontLeft = null;
     private SwerveModule mFrontRight = null;
     private SwerveModule mBackLeft = null;
     private SwerveModule mBackRight = null;
 
+    private Translation2d mFrontLeftLocation = new Translation2d(Units.Meters.of(+0.287), Units.Meters.of(+0.287));
+    private Translation2d mFrontRightLocation = new Translation2d(Units.Meters.of(+0.287), Units.Meters.of(-0.287));
+    private Translation2d mBackLeftLocation = new Translation2d(Units.Meters.of(-0.287), Units.Meters.of(+0.287));
+    private Translation2d mBackRightLocation = new Translation2d(Units.Meters.of(-0.287), Units.Meters.of(-0.287));
+
     private SwerveDriveKinematics mKinematics = new SwerveDriveKinematics(
         mFrontLeftLocation, 
         mFrontRightLocation, 
         mBackLeftLocation,
         mBackRightLocation
-    ); 
+    );
         
     private AHRS mGyro = new AHRS(AHRS.NavXComType.kMXP_SPI);
     private Angle mGyroOffset = Degrees.of(0.0);
@@ -69,7 +69,6 @@ public class Drivetrain extends SubsystemBase {
         double turnD = 0.0;
 
         {
-
             Optional<Double> kP = table.getDouble("swerve.turn.kP");
 
             if (kP.isEmpty()) {
@@ -82,7 +81,6 @@ public class Drivetrain extends SubsystemBase {
         }
 
         {
-
             Optional<Double> kI = table.getDouble("swerve.turn.kI");
 
             if (kI.isEmpty()) {
@@ -107,8 +105,7 @@ public class Drivetrain extends SubsystemBase {
 
         PidConfig turnPidConfig = new PidConfig(turnP, turnI, turnD);
         
-        {
-            
+        {           
             Optional<Double> frontLeftAbsEncoderOffset = table.getDouble("frontLeftAbsEncoderOffset");
             
             if (frontLeftAbsEncoderOffset.isEmpty()) {
@@ -205,9 +202,6 @@ public class Drivetrain extends SubsystemBase {
                 mBackRight.GetPosition()
             }
         );
-
-
-
     } //this bracket ends config table
 
     public void Drive(
