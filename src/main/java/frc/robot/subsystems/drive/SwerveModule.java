@@ -91,11 +91,11 @@ public class SwerveModule {
         turnMotorConfig.encoder
             .positionConversionFactor(
                 2.0 * Math.PI
-                / Constants.Drive.kTrunWheelPerMotorRatio
+                / Constants.Drive.kTurnWheelPerMotorRatio
             )
             .velocityConversionFactor(
                 (2.0 * Math.PI / 1.0)
-                / Constants.Drive.kTrunWheelPerMotorRatio
+                / Constants.Drive.kTurnWheelPerMotorRatio
                 * (1.0 / 60.0)
             );
 
