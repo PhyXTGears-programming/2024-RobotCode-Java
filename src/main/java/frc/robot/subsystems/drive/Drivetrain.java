@@ -52,15 +52,7 @@ public class Drivetrain extends SubsystemBase {
 
     private boolean mIsFieldOriented = true;
 
-    private SwerveDriveOdometry mOdometry = new SwerveDriveOdometry(
-        mKinematics,
-        mGyro.getRotation2d(),
-        new SwerveModulePosition[] {
-            getModulePosition(mFrontLeftLocation),
-            getModulePosition(mFrontRightLocation),
-            getModulePosition(mBackLeftLocation),
-            getModulePosition(mBackRightLocation)},
-        new Pose2d());
+    private SwerveDriveOdometry mOdometry;
 
 
     public Drivetrain(ConfigTable table) {
