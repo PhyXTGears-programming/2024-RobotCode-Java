@@ -143,12 +143,10 @@ public class Drivetrain extends SubsystemBase {
                 turnPidConfig,
                 "front-right"
             );
-
-
         }
 
         {
-            Optional<Double> backLeftAbsEncoderOffset = table.getDouble("backLeftAbsEncoder");
+            Optional<Double> backLeftAbsEncoderOffset = table.getDouble("backLeftAbsEncoderOffset");
 
             if (backLeftAbsEncoderOffset.isEmpty()) {
                 System.err.println("Error: drivetrain cannot find toml property backLeftAbsEncoderOffset");
@@ -167,7 +165,7 @@ public class Drivetrain extends SubsystemBase {
 
         {
         
-            Optional<Double> backRightAbsEncoderOffset = table.getDouble("backRightAbsEncoder");
+            Optional<Double> backRightAbsEncoderOffset = table.getDouble("backRightAbsEncoderOffset");
 
             if (backRightAbsEncoderOffset.isEmpty()) {
                 System.err.println("Error: drivetrain cannot find toml property backRightAbsEncoderOffset");
