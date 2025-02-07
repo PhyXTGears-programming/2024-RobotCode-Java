@@ -245,6 +245,18 @@ public class FollowPath extends Command {
 
     @Override
     public boolean isFinished() {
+        if (mCurrentPoseIndex != mPath.size() - 1 || !mCmdQueue.isEmpty()) {
+            return false;
+        }
+        Point currentPoint = mDrivetrain.getChassisPosition();
+        final PathPoint selectedPose = mPath.get(mCurrentPoseIndex);
+        Point targetPoint = new Point(selectedPose.getX().in(Meters), selectedPose.getY().in(Meters));
+        double distanceToTarget = (targetPoint.minus(currentPoint)).len();
+
+        return (distanceToTarget < 0.05);
+
+    
+    }
         
     }
 }
