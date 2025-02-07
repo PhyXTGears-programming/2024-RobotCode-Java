@@ -234,7 +234,7 @@ public class Drivetrain extends SubsystemBase {
             ChassisSpeeds.discretize(chassisSpeeds, period.in(Seconds))
         );
 
-        SwerveDriveKinematics.desaturateWheelSpeeds(states, Constants.Drive.kMaxDriveSpeedMetersPerSecond);
+        SwerveDriveKinematics.desaturateWheelSpeeds(states, Constants.kMaxDriveSpeed);
 
         SwerveModuleState fl = states[0];
         SwerveModuleState fr = states[1];
