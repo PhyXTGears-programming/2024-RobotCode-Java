@@ -4,9 +4,21 @@
 
 package frc.robot;
 
+import java.util.Optional;
+
+import edu.wpi.first.units.Units;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+
+import frc.robot.commands.driveTeleopCommand.DriveTeleopCommand;
+import frc.robot.lib.config.ConfigLoader;
+import frc.robot.lib.config.ConfigTable;
+import frc.robot.lib.config.TomlConfigLoader;
+import frc.robot.subsystems.drive.Drivetrain;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -19,6 +31,8 @@ public class Robot extends TimedRobot {
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
+  
+  private Drivetrain kDrivetrain = null;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -26,6 +40,21 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
+
+    String path = Filesystem.getDeployDirectory().getAbsolutePath();
+
+    ConfigLoader config = new TomlConfigLoader(path + "/config.toml");
+
+    config.openConfig();
+
+    Optional<ConfigTable> table = config.getTable("drivetrain");
+
+    if(table.isEmpty()){
+      throw new Error("Unable to find config table 'drivetrain' ");
+    }
+    
+    kDrivetrain = new Drivetrain(table.get());
+
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
@@ -39,7 +68,9 @@ public class Robot extends TimedRobot {
    * SmartDashboard integrated updating.
    */
   @Override
-  public void robotPeriodic() {}
+  public void robotPeriodic() {
+    CommandScheduler.getInstance().run();
+  }
 
   /**
    * This autonomous (along with the chooser code above) shows how to select between different
@@ -74,7 +105,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called once when teleop is enabled. */
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    CommandScheduler.getInstance().schedule(new DriveTeleopCommand(kDrivetrain, new XboxController(0), Units.Milliseconds.of(20.0)));
+  }
 
   /** This function is called periodically during operator control. */
   @Override

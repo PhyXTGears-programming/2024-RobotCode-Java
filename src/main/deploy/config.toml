@@ -1,0 +1,9 @@
+[drivetrain]
+frontLeftAbsEncoderOffset  =    38.1
+frontRightAbsEncoderOffset =  -131.0
+backLeftAbsEncoderOffset   =   -96.4
+backRightAbsEncoderOffset  =   -30.6
+
+swerve.turn.kP = 2.0
+swerve.turn.kI = 0.01
+swerve.turn.kD = 3.0
