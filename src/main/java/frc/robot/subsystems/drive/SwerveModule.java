@@ -100,13 +100,16 @@ public class SwerveModule {
             );
 
         turnMotorConfig.closedLoop
-            .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+            .outputRange(-1.0, 1.0)
+            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .pidf(
                 turnConfig.kP, //SetP
                 turnConfig.kI, //SetI
                 turnConfig.kD, //SetD
                 0.0  //SetFF
-            );
+            )
+            .positionWrappingEnabled(true)
+            .positionWrappingInputRange(-Math.PI, Math.PI);
 
 
         mTurnMotor.configure(turnMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
