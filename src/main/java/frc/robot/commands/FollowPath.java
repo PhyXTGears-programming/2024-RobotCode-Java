@@ -99,13 +99,138 @@ public class FollowPath extends Command {
         if (-1 == mHaltPoseIndex) {
             // No halt point selected.
 
-            // Serach for next appearling point.
+            // Serach for next appealing point.
             // If any new points visited have a halt condition, then look no further.
-            for (int i = mCurrentPoseIndex; m < mPath.size(); i ++) {
-                // FIXME: set a value to be = mPath.get(i);
+            for (int i = mCurrentPoseIndex; i < mPath.size(); i ++) {
+                PathPoint pose = mPath.get(i);
+
+                if (pose.getType() == PathPointType.Halt && i != mCurrentPoseIndex) {
+                    // Found halt point that is not the current point.
+                    mHaltPoseIndex = i;
+                    mCurrentPoseIndex = i;
+                    mIsAtHaltPose = false;
+
+                    // Break early so we don't look past this stop waypoint.
+                    break;
+                }
+            
+            double distance = Math.sqrt(
+                Math.pow(pose.getX().in(Meters) - currentPoint.x, 2)
+                + Math.pow(pose.getY().in(Meters) -currentPoint.y, 2)
+            );
+
+            if (distance > Constants.Auto.kMaxPathPoseDistance.in(Meters)) {
+                // Found point just outside max distance.
+                mCurrentPoseIndex = i;
+                break;
+            }
+
+            if (i == (mPath.size() -1)) {
+                // No appealing point found before the end of the list.
+                // Use the last point.
+                mCurrentPoseIndex = i; 
+            }
+
+
+            
+            }
+        } else {
+            // Halt point already selected. Maintain approach to halt point.
+            mCurrentPoseIndex =  mHaltPoseIndex; 
+        }
+        
+        int nextNearestPoseIndex = mLastNearestPoseIndex;
+
+        // If any new nearby points have commands, add those commands to the queue.
+
+        // Collect commands up to current nearest index.
+        for (int i = mLastNearestPoseIndex; i <= mCurrentPoseIndex && i < mPath.size(); i ++) {
+            PathPoint pose = mPath.get(i);
+            double distance = Math.sqrt(
+                Math.pow(pose.getX().in(Meters) - currentPoint.x, 2)
+                + Math.pow(pose.getY().in(Meters) - currentPoint.y, 2)
+            );
+
+            if (distance <= Constants.Auto.kNearbyDistanceThreshold.in(Meters)) {
+                nextNearestPoseIndex = i;
             }
         }
+
+        // If new nearby point found, collect all commands since last nearest point.
+        for (int i = mLastNearestPoseIndex + 1; i <= nextNearestPoseIndex; i ++) {
+            PathPoint pose = mPath.get(i);
+
+            if (pose.hasCommand()) {
+                System.out.println("Auto: FollowPath: Queue command: Pose" + i);
+
+                if (mCmdQueue.isEmpty()) {
+                    // No commands active. Run command immediately.
+                    mCmdQueue.add(pose.getCommand().orElseGet((() -> {
+                        System.err.println("Error: Unable to find command at pose");
+                        return Commands.none();
+                    })));
+                    System.out.println("Auto: FollowPath: Start command");
+                    mCmdQueue.peek().initialize();
+                } else {
+                    // Another command is active. Only add to queue.
+                    mCmdQueue.add(pose.getCommand().orElseGet((() -> {
+                        System.err.println("Error: Unable to find command at pose");
+                        return Commands.none();
+                    })));
+                }
+            }
+
         }
+
+        mLastNearestPoseIndex = nextNearestPoseIndex;
+
+        // Movement
+        PathPoint selectedPose = mPath.get(mCurrentPoseIndex);
+
+        Point targetPoint = new Point(selectedPose.getX().in(Meters), selectedPose.getY().in(Meters));
+
+        Vector vectorToTarget = (targetPoint.minus(currentPoint));
+        Vector directionToTarget = vectorToTarget.unit();
+        double distanceToTarget = vectorToTarget.len();
+
+        Vector movementDirection = directionToTarget;
+
+        LinearVelocity speed = selectedPose.getVelocity();
+        if (speed.in(MetersPerSecond) > Constants.Drive.kMaxDriveSpeedMetersPerSecond) speed = mMaxSpeed;
+
+        if (-1 != mHaltPoseIndex) {
+            if (distanceToTarget < Constants.Auto.kHaltDistanceThreshold.in(Meters)) {
+                // Run point commands.
+                mIsAtHaltPose = true;
+            } else {
+                speed = Constants.Auto.kMinSpeed;
+            }
+        }
+
+        // Rotation
+        double currentHeading = mDrivetrain.getHeading().in(Radians);
+
+        double targetRadians = selectedPose.getRotation().getRadians();
+        double headingDelta = Math.IEEEremainder((targetRadians - currentHeading), Math.PI * 2.0);
+
+        double rotationSpeed = 0.0;
+
+        if (Math.abs(headingDelta) > Constants.Auto.kRotationDeadZone.getRadians()) {
+            rotationSpeed = Math.copySign(clamp(Math.abs(headingDelta) / Math.PI, 0.05, 1), headingDelta
+            * Constants.Auto.kRotationSpeed.in(RadiansPerSecond));
+        }
+
+        AngularVelocity rotationSpeedRadians = RadiansPerSecond.of(rotationSpeed);
+
+        mDrivetrain.Drive(
+            speed.times(movementDirection.x),
+            speed.times(movementDirection.y),
+            rotationSpeedRadians,
+            true,
+            Milliseconds.of(20)
+        );
+
+    }
 
     @Override
     public void end(boolean isInterrupted) {
