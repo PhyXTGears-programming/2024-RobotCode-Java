@@ -1,16 +1,24 @@
 package frc.robot.commands;
+import frc.robot.Constants;
+import frc.robot.math.Point;
+import frc.robot.math.Vector;
+
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Milliseconds;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.Constants.Drive;
 import frc.robot.auto.PathPoint;
 import frc.robot.auto.PathPoint.PathPointType;
-import frc.robot.math.Point;
 import frc.robot.subsystems.drive.Drivetrain;
 
 public class FollowPath extends Command {
@@ -258,5 +266,8 @@ public class FollowPath extends Command {
     
     }
         
-    }
+private double clamp(double value, double minValue, double maxValue) {
+    return (Math.min(Math.max(minValue, value), maxValue));
+}
+
 }
