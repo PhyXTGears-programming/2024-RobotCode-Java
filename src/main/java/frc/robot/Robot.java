@@ -19,6 +19,8 @@ import frc.robot.lib.config.ConfigLoader;
 import frc.robot.lib.config.ConfigTable;
 import frc.robot.lib.config.TomlConfigLoader;
 import frc.robot.subsystems.drive.Drivetrain;
+import frc.robot.subsystems.vision.*;
+import frc.robot.commands.visionDriveCommand.*;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -33,6 +35,10 @@ public class Robot extends TimedRobot {
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   
   private Drivetrain kDrivetrain = null;
+
+  private Vision kVisionSubsystem = null;
+
+  private VisionDriveCommand kVisionDriveCommand = null;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -53,7 +59,10 @@ public class Robot extends TimedRobot {
       throw new Error("Unable to find config table 'drivetrain' ");
     }
     
-    kDrivetrain = new Drivetrain(table.get());
+    kDrivetrain = new Drivetrain(table.get()); 
+
+    kVisionSubsystem = new Vision();
+    kVisionDriveCommand = new VisionDriveCommand(kVisionSubsystem, kDrivetrain, 1, Units.Milliseconds.of(20.0));
 
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
@@ -70,6 +79,9 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    // update the kVisionSubsytem
+    kVisionSubsystem.updateLimelight();
+    kVisionSubsystem.updateSmartDashboard();
   }
 
   /**
@@ -87,6 +99,11 @@ public class Robot extends TimedRobot {
     m_autoSelected = m_chooser.getSelected();
     // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
     System.out.println("Auto selected: " + m_autoSelected);
+
+    CommandScheduler.getInstance().schedule(
+      kVisionDriveCommand
+    );
+
   }
 
   /** This function is called periodically during autonomous. */
