@@ -57,6 +57,11 @@ public class DriveTeleopCommand extends Command {
         //
         //NOTE no trigger takes priority of the other so if both pressed they will cancel each other 
 
+        if (mDriveController.getBButtonPressed()) {
+            mDrivetrain.zeroGyro();
+            System.out.println("Reseting Gyro");
+        }
+
         double leftTrigger = mDriveController.getLeftTriggerAxis(); // Range [0.0..1.0]
         double rightTrigger = mDriveController.getRightTriggerAxis(); // Range [0.0..1.0]
 
