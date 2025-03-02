@@ -171,7 +171,7 @@ public class Drivetrain extends SubsystemBase {
                 "back-right");
         }
 
-        mGyro.reset();
+        //mGyro.reset();
 
         Timer deadline = new Timer();
         deadline.start();
@@ -183,7 +183,7 @@ public class Drivetrain extends SubsystemBase {
             }
         }
 
-        zeroGyro();
+        //zeroGyro();
 
         mOdometry = new SwerveDriveOdometry(
             mKinematics,

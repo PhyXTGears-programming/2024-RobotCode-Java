@@ -77,7 +77,7 @@ public class SwerveModule {
             );
 
         mDriveMotor.configure(driveMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
+        
         mTurnMotor = new SparkMax(turnMotorCan, MotorType.kBrushless);
         
         SparkMaxConfig turnMotorConfig = new SparkMaxConfig();

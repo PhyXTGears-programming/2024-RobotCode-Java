@@ -1,16 +1,14 @@
 package frc.robot.commands.driveTeleopCommand;
 
 import static edu.wpi.first.math.MathUtil.applyDeadband;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
+
 
 import frc.robot.subsystems.drive.*;
 import frc.robot.Constants;
-
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -51,17 +49,21 @@ public class DriveTeleopCommand extends Command {
     @Override
     public void execute() {
         mDrivetrain.updateOdometry();
-        //compresses the range of the driving speed to be within the max speed and
-        //the minimum. but have the normal speed be the default if no trigger is 
-        //being pressed (so both register 0)
-        //
-        //NOTE no trigger takes priority of the other so if both pressed they will cancel each other 
 
         if (mDriveController.getBButtonPressed()) {
             mDrivetrain.zeroGyro();
             System.out.println("Reseting Gyro");
         }
 
+        if (mDriveController.getYButtonPressed()) {
+            mDrivetrain.toggleFieldOriented();
+        }
+        
+        //compresses the range of the driving speed to be within the max speed and
+        //the minimum. but have the normal speed be the default if no trigger is 
+        //being pressed (so both register 0)
+        //
+        //NOTE no trigger takes priority of the other so if both pressed they will cancel each other 
         double leftTrigger = mDriveController.getLeftTriggerAxis(); // Range [0.0..1.0]
         double rightTrigger = mDriveController.getRightTriggerAxis(); // Range [0.0..1.0]
 

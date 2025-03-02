@@ -5,26 +5,20 @@ import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.lib.config.ConfigTable;
 
 // import java.util.ArrayList;
 
 
 public class Vision extends SubsystemBase {
 
-    // [ private's ]
-    // get the limelight table from the NetworkTableInstance object
-    private static NetworkTable mLimelightTable = NetworkTableInstance.getDefault().getTable("limelight");
-    
-    // a object used to write to the "priorityid" on the limelight
-    private IntegerPublisher mFilterId = mLimelightTable.getIntegerTopic("priorityid").publish();
+    // private's
     
     private static final String FILTER_ID_INPUT_KEY = "filter april tag Id (Input): ";
     private static final String OVER_WRITE_APRILTAG_FILTER_INPUT_KEY = "Over write april tag Id (Input): ";
     
     // the fliter id of the april tag
     private int filterId = -1;
-
+    
     // target data vars
     private double mTx = 0.0;
     private double mTy = 0.0;
@@ -37,14 +31,42 @@ public class Vision extends SubsystemBase {
     
     private double[] mData3D = new double[6]; 
     
-    // [ public's ]
-    // for now instead of a toml FIXME:
-    public static final double STOP_MOVING_THERSHOLD = 0.55;
-    public static final double TURNING_THERSHOLD = 0.08;
-
-
+    // public's
+    
+    
     // how far we want the robot to be from the target apirl tag
-    public static final double DISTANCE_WANTED_FOR_ROBOT = 0.55;
+    public static final double DISTANCE_WANTED_FOR_ROBOT = 0.19;
+
+    public static double[] rotations = {
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        60.0,
+        -120.0,
+        180.0,
+        120.0,
+        -40.0,
+        60.0,
+        -100.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+    };
+    
+    
+    // get the limelight table from the NetworkTableInstance object
+    public final NetworkTable mLimelightTable = NetworkTableInstance.getDefault().getTable("limelight");
+    // a object used to write to the "priorityid" on the limelight
+    private IntegerPublisher mFilterId = mLimelightTable.getIntegerTopic("priorityid").publish();
 
     
     public Vision() {
@@ -55,7 +77,7 @@ public class Vision extends SubsystemBase {
         // FIXME: load value from config table.
         DEBUG_MODE = true;
     }
-
+    
     public void setFilter(int newFilterId) {
         // set "priorityid" Ids from limelight
         filterId = newFilterId;
@@ -129,7 +151,7 @@ public class Vision extends SubsystemBase {
     }
 
     // NOTE: this function DOES return a null value if no april tag is found
-    public VisionTagData robotDriveToAprilTag(int Id) {
+    public VisionTagData robotDriveToAprilTag(int Id, double offset) {
         if (Id != filterId){
             setFilter(Id);
         }
@@ -137,7 +159,7 @@ public class Vision extends SubsystemBase {
         // final - initial
 
         if (isAprilTagDetected()) {
-            return new VisionTagData(0.0 - mTx, DISTANCE_WANTED_FOR_ROBOT - getTagZ());
+            return new VisionTagData(offset - mTx, DISTANCE_WANTED_FOR_ROBOT - getTagZ());
         }
 
         return null;
@@ -149,7 +171,7 @@ public class Vision extends SubsystemBase {
         mTy =          mLimelightTable.getEntry("ty").getDouble(0.0);
         mTa =          mLimelightTable.getEntry("ta").getDouble(0.0);
         mTl =          mLimelightTable.getEntry("tl").getDouble(0.0);
-        mTargetTagId = (int) mLimelightTable.getEntry("tid").getInteger(0);
+        mTargetTagId = (int) mLimelightTable.getEntry("tid").getInteger(-1);
 
         mData3D =      mLimelightTable.getEntry("targetpose_cameraspace").getDoubleArray(new double[6]);
 
