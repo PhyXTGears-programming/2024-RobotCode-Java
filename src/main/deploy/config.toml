@@ -7,3 +7,31 @@ backRightAbsEncoderOffset  =   -30.6
 swerve.turn.kP = 2.0
 swerve.turn.kI = 0.01
 swerve.turn.kD = 3.0
+
+[vision]
+
+strafeSpeed = 0.22
+turnSpeed = 0.58
+forwardSpeed = 1.0
+
+maxLinearSpeed = 1.9
+
+maxAngularSpeed = 1.2
+
+minMoveSpeedLinear = 0.03
+
+minMoveSpeedAngular = 0.1
+
+distanceMultiplierForwards = 0.65
+distanceMultiplierStafing = 0.07
+distanceMultiplierTurning = 0.4
+
+LIMELIGHT_INIT_FAILED_TIME = 0.4
+
+STOP_MOVING_THERSHOLD = 0.58
+STAFE_THERSHOLD = 1.5
+TURNING_THERSHOLD = 5.0
+
+DISTANCE_WANTED_FOR_ROBOT = 0.19
+
+DEBUG_MODE = false

@@ -1,9 +1,16 @@
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.lib.config.ConfigTable;
+
+import java.util.Optional;
+
 import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // import java.util.ArrayList;
@@ -27,15 +34,11 @@ public class Vision extends SubsystemBase {
     
     private int mTargetTagId = -1;
     
-    private final boolean DEBUG_MODE;
-    
     private double[] mData3D = new double[6]; 
+
+    private Config mConfig = new Config();
     
     // public's
-    
-    
-    // how far we want the robot to be from the target apirl tag
-    public static final double DISTANCE_WANTED_FOR_ROBOT = 0.19;
 
     public static double[] rotations = {
         0.0,
@@ -69,13 +72,208 @@ public class Vision extends SubsystemBase {
     private IntegerPublisher mFilterId = mLimelightTable.getIntegerTopic("priorityid").publish();
 
     
-    public Vision() {
+    public Vision(ConfigTable table) {
         // reset the filters
         SmartDashboard.putNumber(FILTER_ID_INPUT_KEY, -1);
         SmartDashboard.putBoolean(OVER_WRITE_APRILTAG_FILTER_INPUT_KEY, false);
         setFilter(-1);
-        // FIXME: load value from config table.
-        DEBUG_MODE = true;
+
+        // init
+        
+        {
+            Optional<Double> DISTANCE_WANTED_FOR_ROBOTToml = table.getDouble("DISTANCE_WANTED_FOR_ROBOT");
+
+            if (DISTANCE_WANTED_FOR_ROBOTToml.isEmpty()) {
+                System.err.println("Error: VisionTeleopCommand cannot find toml property DISTANCE_WANTED_FOR_ROBOT");
+                throw new Error("error");
+            }
+
+            mConfig.DISTANCE_WANTED_FOR_ROBOT = DISTANCE_WANTED_FOR_ROBOTToml.get();
+
+        }
+
+        {
+            Optional<Boolean> DEBUG_MODEToml = table.getBoolean("DEBUG_MODE");
+
+            if (DEBUG_MODEToml.isEmpty()) {
+                System.err.println("Error: VisionTeleopCommand cannot find toml property DEBUG_MODE");
+                throw new Error("error");
+            }
+
+            mConfig.DEBUG_MODE = DEBUG_MODEToml.get();
+
+        }
+
+        // init for drive command
+
+        {
+            Optional<Double> strafeSpeed = table.getDouble("strafeSpeed");
+
+            if (strafeSpeed.isEmpty()) {
+                System.err.println("Error: VisionTeleopCommand cannot find toml property strafeSpeed");
+                throw new Error("error");
+            }
+
+            mConfig.kStrafeSpeed = Units.MetersPerSecond.of(strafeSpeed.get());
+
+        }
+
+        {
+            Optional<Double> turnSpeed = table.getDouble("turnSpeed");
+
+            if (turnSpeed.isEmpty()) {
+                System.err.println("Error: VisionTeleopCommand cannot find toml property turnSpeed");
+                throw new Error("error");
+            }
+
+            mConfig.kTurnSpeed = Units.RadiansPerSecond.of(turnSpeed.get());
+
+        }
+
+        {
+            Optional<Double> forwardSpeed = table.getDouble("forwardSpeed");
+
+            if (forwardSpeed.isEmpty()) {
+                System.err.println("Error: VisionTeleopCommand cannot find toml property forwardSpeed");
+                throw new Error("error");
+            }
+
+            mConfig.kForwardSpeed = Units.MetersPerSecond.of(forwardSpeed.get());
+
+        }
+
+        {
+            Optional<Double> maxLinearSpeed = table.getDouble("maxLinearSpeed");
+
+            if (maxLinearSpeed.isEmpty()) {
+                System.err.println("Error: VisionTeleopCommand cannot find toml property maxLinearSpeed");
+                throw new Error("error");
+            }
+
+            mConfig.kMaxLinearSpeed = Units.MetersPerSecond.of(maxLinearSpeed.get());
+
+        }
+
+        {
+            Optional<Double> maxAngularSpeed = table.getDouble("maxAngularSpeed");
+
+            if (maxAngularSpeed.isEmpty()) {
+                System.err.println("Error: VisionTeleopCommand cannot find toml property maxAngularSpeed");
+                throw new Error("error");
+            }
+
+            mConfig.kMaxAngularSpeed = Units.RadiansPerSecond.of(maxAngularSpeed.get());
+
+        }
+
+        {
+            Optional<Double> distanceMultiplierForwards = table.getDouble("distanceMultiplierForwards");
+
+            if (distanceMultiplierForwards.isEmpty()) {
+                System.err.println("Error: VisionTeleopCommand cannot find toml property distanceMultiplierForwards");
+                throw new Error("error");
+            }
+
+            mConfig.kDistanceMultiplierForwards = distanceMultiplierForwards.get();
+
+        }
+
+        {
+            Optional<Double> distanceMultiplierStafing = table.getDouble("distanceMultiplierStafing");
+
+            if (distanceMultiplierStafing.isEmpty()) {
+                System.err.println("Error: VisionTeleopCommand cannot find toml property distanceMultiplierStafing");
+                throw new Error("error");
+            }
+
+            mConfig.kDistanceMultiplierStafing = distanceMultiplierStafing.get();
+
+        }
+
+        {
+            Optional<Double> distanceMultiplierTurning = table.getDouble("distanceMultiplierTurning");
+
+            if (distanceMultiplierTurning.isEmpty()) {
+                System.err.println("Error: VisionTeleopCommand cannot find toml property distanceMultiplierTurning");
+                throw new Error("error");
+            }
+
+            mConfig.kDistanceMultiplierTurning = distanceMultiplierTurning.get();
+
+        }
+
+        {
+            Optional<Double> minMoveSpeedLinear = table.getDouble("minMoveSpeedLinear");
+
+            if (minMoveSpeedLinear.isEmpty()) {
+                System.err.println("Error: VisionTeleopCommand cannot find toml property minMoveSpeedLinear");
+                throw new Error("error");
+            }
+
+            mConfig.kMinMoveSpeedLinear = Units.MetersPerSecond.of(minMoveSpeedLinear.get());
+
+        }
+
+        {
+            Optional<Double> minMoveSpeedAngular = table.getDouble("minMoveSpeedAngular");
+
+            if (minMoveSpeedAngular.isEmpty()) {
+                System.err.println("Error: VisionTeleopCommand cannot find toml property minMoveSpeedAngular");
+                throw new Error("error");
+            }
+
+            mConfig.kMinMoveSpeedAngular = Units.RadiansPerSecond.of(minMoveSpeedAngular.get());
+
+        }
+
+        {
+            Optional<Double> STOP_MOVING_THERSHOLDToml = table.getDouble("STOP_MOVING_THERSHOLD");
+
+            if (STOP_MOVING_THERSHOLDToml.isEmpty()) {
+                System.err.println("Error: VisionTeleopCommand cannot find toml property STOP_MOVING_THERSHOLD");
+                throw new Error("error");
+            }
+
+            mConfig.STOP_MOVING_THERSHOLD = STOP_MOVING_THERSHOLDToml.get();
+
+        }
+
+        {
+            Optional<Double> STAFE_THERSHOLDToml = table.getDouble("STAFE_THERSHOLD");
+
+            if (STAFE_THERSHOLDToml.isEmpty()) {
+                System.err.println("Error: VisionTeleopCommand cannot find toml property STAFE_THERSHOLD");
+                throw new Error("error");
+            }
+
+            mConfig.STAFE_THERSHOLD = STAFE_THERSHOLDToml.get();
+
+        }
+
+        {
+            Optional<Double> TURNING_THERSHOLDToml = table.getDouble("TURNING_THERSHOLD");
+
+            if (TURNING_THERSHOLDToml.isEmpty()) {
+                System.err.println("Error: VisionTeleopCommand cannot find toml property TURNING_THERSHOLD");
+                throw new Error("error");
+            }
+
+            mConfig.TURNING_THERSHOLD = TURNING_THERSHOLDToml.get();
+
+        }
+
+        {
+            Optional<Double> LIMELIGHT_INIT_FAILED_TIMEToml = table.getDouble("LIMELIGHT_INIT_FAILED_TIME");
+
+            if (LIMELIGHT_INIT_FAILED_TIMEToml.isEmpty()) {
+                System.err.println("Error: VisionTeleopCommand cannot find toml property LIMELIGHT_INIT_FAILED_TIME");
+                throw new Error("error");
+            }
+
+            mConfig.LIMELIGHT_INIT_FAILED_TIME = LIMELIGHT_INIT_FAILED_TIMEToml.get();
+
+        }
+
     }
     
     public void setFilter(int newFilterId) {
@@ -159,7 +357,7 @@ public class Vision extends SubsystemBase {
         // final - initial
 
         if (isAprilTagDetected()) {
-            return new VisionTagData(offset - mTx, DISTANCE_WANTED_FOR_ROBOT - getTagZ());
+            return new VisionTagData(offset - mTx, mConfig.DISTANCE_WANTED_FOR_ROBOT - getTagZ());
         }
 
         return null;
@@ -178,7 +376,7 @@ public class Vision extends SubsystemBase {
     } 
     
     public void updateSmartDashboard() {
-        if (!DEBUG_MODE) {
+        if (!mConfig.DEBUG_MODE) {
             return;
         }
         // put values to the SmartDashboard
@@ -204,6 +402,10 @@ public class Vision extends SubsystemBase {
 
     }
 
+    public Config getConfigCopy() {
+        return mConfig.getCopy();
+    }
+
 
     // data for other subsystems to use this class has:
     // turningDistance (double)
@@ -218,4 +420,67 @@ public class Vision extends SubsystemBase {
             mDistanceToAprilTag = DistanceToAprilTag;
         }
     }
+
+    public static final class Config {
+        public boolean DEBUG_MODE;
+            
+        // how far we want the robot to be from the target apirl tag
+        public double DISTANCE_WANTED_FOR_ROBOT;
+
+        // config for drive commands
+
+        public LinearVelocity kStrafeSpeed;
+        public AngularVelocity kTurnSpeed;
+        public LinearVelocity kForwardSpeed;
+
+        public LinearVelocity kMaxLinearSpeed;
+
+        public AngularVelocity kMaxAngularSpeed;
+
+        public double kDistanceMultiplierForwards;
+        public double kDistanceMultiplierStafing;
+        public double kDistanceMultiplierTurning;
+
+        public LinearVelocity kMinMoveSpeedLinear;
+        public AngularVelocity kMinMoveSpeedAngular;
+
+        public double LIMELIGHT_INIT_FAILED_TIME;
+
+        public double STOP_MOVING_THERSHOLD;
+        public double STAFE_THERSHOLD;
+        public double TURNING_THERSHOLD;
+
+        public Config getCopy() {
+            Config config = new Config();
+    
+            config.DISTANCE_WANTED_FOR_ROBOT = this.DISTANCE_WANTED_FOR_ROBOT;
+            config.DEBUG_MODE = this.DEBUG_MODE;
+            
+            // thersholds
+            config.STAFE_THERSHOLD = this.STAFE_THERSHOLD;
+            config.TURNING_THERSHOLD = this.TURNING_THERSHOLD;
+            config.STOP_MOVING_THERSHOLD = this.STOP_MOVING_THERSHOLD;
+
+            config.LIMELIGHT_INIT_FAILED_TIME = this.LIMELIGHT_INIT_FAILED_TIME;
+            
+            // speeds
+            config.kStrafeSpeed = this.kStrafeSpeed;
+            config.kTurnSpeed = this.kTurnSpeed;
+            config.kForwardSpeed = this.kForwardSpeed;
+
+            // min max move speeds
+            config.kMaxLinearSpeed = this.kMaxLinearSpeed;
+            config.kMaxAngularSpeed = this.kMaxAngularSpeed;
+            config.kMinMoveSpeedLinear = this.kMinMoveSpeedLinear;
+            config.kMinMoveSpeedAngular = this.kMinMoveSpeedAngular;
+    
+            config.kDistanceMultiplierForwards = this.kDistanceMultiplierForwards;
+            config.kDistanceMultiplierStafing = this.kDistanceMultiplierStafing;
+            config.kDistanceMultiplierTurning = this.kDistanceMultiplierTurning;
+    
+
+    
+            return config;
+        }
+    } 
 }

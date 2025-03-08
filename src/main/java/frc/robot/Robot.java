@@ -71,9 +71,18 @@ public class Robot extends TimedRobot {
 
         kDrivetrain = new Drivetrain(table.get());
 
-        kVisionSubsystem = new Vision();
+        // init vision
+
+        table = config.getTable("vision");
+
+        if (table.isEmpty()) {
+            throw new Error("Unable to find config table 'vision' ");
+        }
+
+        kVisionSubsystem = new Vision(table.get());
         kVisionAutoCommand = new VisionAutoCommand(kVisionSubsystem, kDrivetrain, 10, Units.Milliseconds.of(20.0));
         mVisionTeleopCommand = new VisionTeleopCommand(kVisionSubsystem, kDrivetrain, -1, Units.Milliseconds.of(20.0));
+        
         kDriveTeleopCommand = new DriveTeleopCommand(kDrivetrain, kDriveController, Units.Milliseconds.of(20.0));
 
         m_chooser.setDefaultOption("Default Auto", kDefaultAuto);

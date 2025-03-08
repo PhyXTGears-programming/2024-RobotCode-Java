@@ -3,6 +3,7 @@ package frc.robot.commands.visionDriveCommand;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.*;
@@ -15,10 +16,6 @@ import frc.robot.subsystems.vision.*;
 public class VisionTeleopCommand extends Command {
 
     // config
-    // for now instead of a toml FIXME:
-    public static final double STOP_MOVING_THERSHOLD = 0.58;
-    public static final double STAFE_THERSHOLD = 1.5;
-    public static final double TURNING_THERSHOLD = 5.0;
 
     public double mOffset;
 
@@ -26,25 +23,7 @@ public class VisionTeleopCommand extends Command {
     private final Drivetrain kDrivetrain;
     private final Time kRobotPeriod;
 
-    // config
-
-    private final LinearVelocity kStrafeSpeed = Units.MetersPerSecond.of(0.22);
-    private final AngularVelocity kTurnSpeed = Units.RadiansPerSecond.of(0.58);
-    private final LinearVelocity kForwardSpeed = Units.MetersPerSecond.of(1.0);
-
-    private final LinearVelocity kMaxLinearSpeed = Units.MetersPerSecond.of(1.9);
-
-    private final AngularVelocity kMaxAngularSpeed = Units.RadiansPerSecond.of(1.2);
-
-    private final double kDistanceMultiplierForwards = 0.65;
-    private final double kDistanceMultiplierStafing = 0.07;
-    private final double kDistanceMultiplierTurning = 0.4;
-
-    private final LinearVelocity kMinMoveSpeedLinear = Units.MetersPerSecond.of(0.03);
-    private final AngularVelocity kMinMoveSpeedAngular = Units.RadiansPerSecond.of(0.1);
-
     private final Timer kTimer = new Timer();
-    private final double limelightInitFailedTime = 0.4;
 
     private boolean mIsDoneStafing = false;
     private boolean mIsDoneMoving = false;
@@ -57,6 +36,8 @@ public class VisionTeleopCommand extends Command {
     private LinearVelocity mStafeVelocity = Units.MetersPerSecond.zero();
     private LinearVelocity mForwardVelocity = Units.MetersPerSecond.zero();
 
+    private Vision.Config mConfig;
+
     public VisionTeleopCommand(
             Vision visionSubsystem,
             Drivetrain drivetrain,
@@ -66,6 +47,8 @@ public class VisionTeleopCommand extends Command {
         kVisionSubsystem = visionSubsystem;
         kDrivetrain = drivetrain;
         kRobotPeriod = period;
+
+        mConfig = kVisionSubsystem.getConfigCopy();
 
         addRequirements(kDrivetrain, kVisionSubsystem);
     }
@@ -127,13 +110,13 @@ public class VisionTeleopCommand extends Command {
         // turn code
         // detect if we are not done stafing and moving then try and rotate the robot to
         // face the april tag
-        if (!(mIsDoneMoving && mIsDoneStafing) && Math.abs(distanceToTargetHeading) > TURNING_THERSHOLD) {
+        if (!(mIsDoneMoving && mIsDoneStafing) && Math.abs(distanceToTargetHeading) > mConfig.TURNING_THERSHOLD) {
             if (distanceToTargetHeading > 0.0) {
-                mAngularVelocity = kTurnSpeed.times(distanceToTargetHeading * kDistanceMultiplierTurning)
-                        .plus(kMinMoveSpeedAngular);
+                mAngularVelocity = mConfig.kTurnSpeed.times(distanceToTargetHeading * mConfig.kDistanceMultiplierTurning)
+                        .plus(mConfig.kMinMoveSpeedAngular);
             } else {
-                mAngularVelocity = kTurnSpeed.times(distanceToTargetHeading * kDistanceMultiplierTurning)
-                        .minus(kMinMoveSpeedAngular);
+                mAngularVelocity = mConfig.kTurnSpeed.times(distanceToTargetHeading * mConfig.kDistanceMultiplierTurning)
+                        .minus(mConfig.kMinMoveSpeedAngular);
             }
         }
 
@@ -150,20 +133,20 @@ public class VisionTeleopCommand extends Command {
                 SmartDashboard.putNumber("Forward Distance", data.mDistanceToAprilTag);
 
                 // if we are not in the turning thershold
-                if (Math.abs(data.mTurningDistance) > STAFE_THERSHOLD) {
+                if (Math.abs(data.mTurningDistance) > mConfig.STAFE_THERSHOLD) {
                     if (data.mTurningDistance > 0.0) {
                         // System.out.println("Turn right");
 
-                        mStafeVelocity = kStrafeSpeed
-                                .times(Math.abs(data.mTurningDistance * kDistanceMultiplierStafing))
-                                .plus(kMinMoveSpeedLinear);
+                        mStafeVelocity = mConfig.kStrafeSpeed
+                                .times(Math.abs(data.mTurningDistance * mConfig.kDistanceMultiplierStafing))
+                                .plus(mConfig.kMinMoveSpeedLinear);
 
                     } else {
                         // System.out.println("Turn left");
 
-                        mStafeVelocity = kStrafeSpeed
-                                .times(Math.abs(data.mTurningDistance * kDistanceMultiplierStafing))
-                                .plus(kMinMoveSpeedLinear).negate();
+                        mStafeVelocity = mConfig.kStrafeSpeed
+                                .times(Math.abs(data.mTurningDistance * mConfig.kDistanceMultiplierStafing))
+                                .plus(mConfig.kMinMoveSpeedLinear).negate();
 
                     }
 
@@ -174,21 +157,21 @@ public class VisionTeleopCommand extends Command {
                 }
 
                 // see if we are in the STOP_MOVING_THERSHOLD if so then stop
-                if (Math.abs(0.0 - data.mDistanceToAprilTag) > STOP_MOVING_THERSHOLD) {
+                if (Math.abs(0.0 - data.mDistanceToAprilTag) > mConfig.STOP_MOVING_THERSHOLD) {
                     // detect if we are too far from the april tag if so then have forwards
                     if (data.mDistanceToAprilTag > 0.0) {
                         // System.out.println("backwards");
 
-                        mForwardVelocity = kForwardSpeed
-                                .times(Math.abs(data.mDistanceToAprilTag * kDistanceMultiplierForwards))
-                                .plus(kMinMoveSpeedLinear).negate();
+                        mForwardVelocity = mConfig.kForwardSpeed
+                                .times(Math.abs(data.mDistanceToAprilTag * mConfig.kDistanceMultiplierForwards))
+                                .plus(mConfig.kMinMoveSpeedLinear).negate();
 
                     } else {
                         // System.out.println("forwards");
 
-                        mForwardVelocity = kForwardSpeed
-                                .times(Math.abs(data.mDistanceToAprilTag * kDistanceMultiplierForwards))
-                                .plus(kMinMoveSpeedLinear);
+                        mForwardVelocity = mConfig.kForwardSpeed
+                                .times(Math.abs(data.mDistanceToAprilTag * mConfig.kDistanceMultiplierForwards))
+                                .plus(mConfig.kMinMoveSpeedLinear);
                     }
                 } else {
                     mIsDoneMoving = true;
@@ -198,9 +181,9 @@ public class VisionTeleopCommand extends Command {
 
         // clamp just in case
 
-        mForwardVelocity = clamp(mForwardVelocity, kMaxLinearSpeed.negate(), kMaxLinearSpeed);
-        mStafeVelocity = clamp(mStafeVelocity, kMaxLinearSpeed.negate(), kMaxLinearSpeed);
-        mAngularVelocity = clamp(mAngularVelocity, kMaxAngularSpeed.negate(), kMaxAngularSpeed);
+        mForwardVelocity = clamp(mForwardVelocity, mConfig.kMaxLinearSpeed.negate(), mConfig.kMaxLinearSpeed);
+        mStafeVelocity = clamp(mStafeVelocity, mConfig.kMaxLinearSpeed.negate(), mConfig.kMaxLinearSpeed);
+        mAngularVelocity = clamp(mAngularVelocity, mConfig.kMaxAngularSpeed.negate(), mConfig.kMaxAngularSpeed);
 
         // now drive
 
@@ -215,7 +198,7 @@ public class VisionTeleopCommand extends Command {
 
     @Override
     public boolean isFinished() {
-        boolean limelightInitFailed = (kTimer.get() >= limelightInitFailedTime && !mDoneInitTeleop);
+        boolean limelightInitFailed = (kTimer.get() >= mConfig.LIMELIGHT_INIT_FAILED_TIME && !mDoneInitTeleop);
 
         if (mIsDoneMoving && !mIsDoneStafing) {
             System.out.println("stafing is holding us up");
