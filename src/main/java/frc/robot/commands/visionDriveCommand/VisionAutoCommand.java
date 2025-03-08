@@ -14,7 +14,9 @@ import frc.robot.subsystems.vision.*;
 
 public class VisionAutoCommand extends Command {
 
-    // config
+    // vars
+
+    private double mOffset;
 
     private final Vision kVisionSubsystem;
     private final Drivetrain kDrivetrain;
@@ -22,8 +24,9 @@ public class VisionAutoCommand extends Command {
 
     private boolean mIsDoneStafing = false;
     private boolean mIsDoneMoving = false;
+    private boolean mDoneAutoInit = false;
 
-    private final int mTargetDriveAprilTagId;
+    private int mTargetDriveAprilTagId;
 
     private AngularVelocity mAngularVelocity = Units.RadiansPerSecond.zero();
     private LinearVelocity mStafeVelocity = Units.MetersPerSecond.zero();
@@ -34,9 +37,10 @@ public class VisionAutoCommand extends Command {
     public VisionAutoCommand(
             Vision visionSubsystem,
             Drivetrain drivetrain,
-            int targetDriveAprilTagId,
+            int targetTagId1,
+            int targetTagId2,
             Time period) {
-        mTargetDriveAprilTagId = targetDriveAprilTagId;
+
         kVisionSubsystem = visionSubsystem;
         kDrivetrain = drivetrain;
         kRobotPeriod = period;
@@ -44,6 +48,10 @@ public class VisionAutoCommand extends Command {
         mConfig = kVisionSubsystem.getConfigCopy();
 
         addRequirements(kDrivetrain, kVisionSubsystem);
+    }
+
+    public void setOffset(Vision.Alignment alignment) {
+        mOffset = mConfig.getOffset(alignment);
     }
 
     @Override
@@ -60,7 +68,7 @@ public class VisionAutoCommand extends Command {
         if (mTargetDriveAprilTagId == -1)
             return;
 
-        Vision.VisionTagData data = kVisionSubsystem.robotDriveToAprilTag(mTargetDriveAprilTagId, 0.0);
+        Vision.VisionTagData data = kVisionSubsystem.robotDriveToAprilTag(mTargetDriveAprilTagId, mOffset);
 
         double heading = kDrivetrain.getHeading().in(Units.Degree);
         double targetHeading = fmod(Vision.rotations[mTargetDriveAprilTagId - 1], 360.0, 180.0);
@@ -172,11 +180,11 @@ public class VisionAutoCommand extends Command {
 
     @Override
     public boolean isFinished() {
-        if (mIsDoneMoving && !mIsDoneStafing) {
-            System.out.println("stafing is holding us up");
-        } else if (mIsDoneStafing && !mIsDoneMoving) {
-            System.out.println("moving is holding us up");
-        }
+        // if (mIsDoneMoving && !mIsDoneStafing) {
+        //     System.out.println("stafing is holding us up");
+        // } else if (mIsDoneStafing && !mIsDoneMoving) {
+        //     System.out.println("moving is holding us up");
+        // }
 
         if ((mIsDoneStafing && mIsDoneMoving)) {
 

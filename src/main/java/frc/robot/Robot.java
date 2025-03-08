@@ -170,12 +170,12 @@ public class Robot extends TimedRobot {
         if (leftBumper || rightBumper) {
             System.out.println("Driving to april tag...");
 
-            mVisionTeleopCommand.mOffset = leftBumper ? 8.2 : -8.2;
+            mVisionTeleopCommand.setOffset(leftBumper ? Vision.Alignment.LEFT : Vision.Alignment.RIGHT);
 
             kDriveTeleopCommand.cancel();
             mVisionTeleopCommand.schedule();
 
-        } else if (kDriveController.getLeftBumperButtonReleased()) {
+        } else if (kDriveController.getLeftBumperButtonReleased() || kDriveController.getRightBumperButtonReleased()) {
             mVisionTeleopCommand.cancel();
             kDriveTeleopCommand.schedule();
             System.out.println("Cancel");

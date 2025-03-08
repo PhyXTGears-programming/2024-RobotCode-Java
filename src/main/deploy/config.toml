@@ -26,6 +26,10 @@ distanceMultiplierForwards = 0.65
 distanceMultiplierStafing = 0.07
 distanceMultiplierTurning = 0.4
 
+LEFT_OFFSET = 8.2
+RIGHT_OFFSET = -8.2
+CENTER_OFFSET = 0.0
+
 LIMELIGHT_INIT_FAILED_TIME = 0.4
 
 STOP_MOVING_THERSHOLD = 0.58

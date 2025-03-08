@@ -46,13 +46,13 @@ public class Vision extends SubsystemBase {
         0.0,
         0.0,
         0.0,
-        0.0,
+        -60.0,
         0.0,
         60.0,
-        -120.0,
+        -240.0,
         180.0,
-        120.0,
-        -40.0,
+        240.0,
+        40.0,
         60.0,
         -100.0,
         0.0,
@@ -84,7 +84,7 @@ public class Vision extends SubsystemBase {
             Optional<Double> DISTANCE_WANTED_FOR_ROBOTToml = table.getDouble("DISTANCE_WANTED_FOR_ROBOT");
 
             if (DISTANCE_WANTED_FOR_ROBOTToml.isEmpty()) {
-                System.err.println("Error: VisionTeleopCommand cannot find toml property DISTANCE_WANTED_FOR_ROBOT");
+                System.err.println("Error: Vison cannot find toml property DISTANCE_WANTED_FOR_ROBOT");
                 throw new Error("error");
             }
 
@@ -96,7 +96,7 @@ public class Vision extends SubsystemBase {
             Optional<Boolean> DEBUG_MODEToml = table.getBoolean("DEBUG_MODE");
 
             if (DEBUG_MODEToml.isEmpty()) {
-                System.err.println("Error: VisionTeleopCommand cannot find toml property DEBUG_MODE");
+                System.err.println("Error: Vison cannot find toml property DEBUG_MODE");
                 throw new Error("error");
             }
 
@@ -110,7 +110,7 @@ public class Vision extends SubsystemBase {
             Optional<Double> strafeSpeed = table.getDouble("strafeSpeed");
 
             if (strafeSpeed.isEmpty()) {
-                System.err.println("Error: VisionTeleopCommand cannot find toml property strafeSpeed");
+                System.err.println("Error: Vison cannot find toml property strafeSpeed");
                 throw new Error("error");
             }
 
@@ -122,7 +122,7 @@ public class Vision extends SubsystemBase {
             Optional<Double> turnSpeed = table.getDouble("turnSpeed");
 
             if (turnSpeed.isEmpty()) {
-                System.err.println("Error: VisionTeleopCommand cannot find toml property turnSpeed");
+                System.err.println("Error: Vison cannot find toml property turnSpeed");
                 throw new Error("error");
             }
 
@@ -134,7 +134,7 @@ public class Vision extends SubsystemBase {
             Optional<Double> forwardSpeed = table.getDouble("forwardSpeed");
 
             if (forwardSpeed.isEmpty()) {
-                System.err.println("Error: VisionTeleopCommand cannot find toml property forwardSpeed");
+                System.err.println("Error: Vison cannot find toml property forwardSpeed");
                 throw new Error("error");
             }
 
@@ -146,7 +146,7 @@ public class Vision extends SubsystemBase {
             Optional<Double> maxLinearSpeed = table.getDouble("maxLinearSpeed");
 
             if (maxLinearSpeed.isEmpty()) {
-                System.err.println("Error: VisionTeleopCommand cannot find toml property maxLinearSpeed");
+                System.err.println("Error: Vison cannot find toml property maxLinearSpeed");
                 throw new Error("error");
             }
 
@@ -158,7 +158,7 @@ public class Vision extends SubsystemBase {
             Optional<Double> maxAngularSpeed = table.getDouble("maxAngularSpeed");
 
             if (maxAngularSpeed.isEmpty()) {
-                System.err.println("Error: VisionTeleopCommand cannot find toml property maxAngularSpeed");
+                System.err.println("Error: Vison cannot find toml property maxAngularSpeed");
                 throw new Error("error");
             }
 
@@ -170,7 +170,7 @@ public class Vision extends SubsystemBase {
             Optional<Double> distanceMultiplierForwards = table.getDouble("distanceMultiplierForwards");
 
             if (distanceMultiplierForwards.isEmpty()) {
-                System.err.println("Error: VisionTeleopCommand cannot find toml property distanceMultiplierForwards");
+                System.err.println("Error: Vison cannot find toml property distanceMultiplierForwards");
                 throw new Error("error");
             }
 
@@ -182,7 +182,7 @@ public class Vision extends SubsystemBase {
             Optional<Double> distanceMultiplierStafing = table.getDouble("distanceMultiplierStafing");
 
             if (distanceMultiplierStafing.isEmpty()) {
-                System.err.println("Error: VisionTeleopCommand cannot find toml property distanceMultiplierStafing");
+                System.err.println("Error: Vison cannot find toml property distanceMultiplierStafing");
                 throw new Error("error");
             }
 
@@ -194,7 +194,7 @@ public class Vision extends SubsystemBase {
             Optional<Double> distanceMultiplierTurning = table.getDouble("distanceMultiplierTurning");
 
             if (distanceMultiplierTurning.isEmpty()) {
-                System.err.println("Error: VisionTeleopCommand cannot find toml property distanceMultiplierTurning");
+                System.err.println("Error: Vison cannot find toml property distanceMultiplierTurning");
                 throw new Error("error");
             }
 
@@ -206,7 +206,7 @@ public class Vision extends SubsystemBase {
             Optional<Double> minMoveSpeedLinear = table.getDouble("minMoveSpeedLinear");
 
             if (minMoveSpeedLinear.isEmpty()) {
-                System.err.println("Error: VisionTeleopCommand cannot find toml property minMoveSpeedLinear");
+                System.err.println("Error: Vison cannot find toml property minMoveSpeedLinear");
                 throw new Error("error");
             }
 
@@ -218,7 +218,7 @@ public class Vision extends SubsystemBase {
             Optional<Double> minMoveSpeedAngular = table.getDouble("minMoveSpeedAngular");
 
             if (minMoveSpeedAngular.isEmpty()) {
-                System.err.println("Error: VisionTeleopCommand cannot find toml property minMoveSpeedAngular");
+                System.err.println("Error: Vison cannot find toml property minMoveSpeedAngular");
                 throw new Error("error");
             }
 
@@ -230,7 +230,7 @@ public class Vision extends SubsystemBase {
             Optional<Double> STOP_MOVING_THERSHOLDToml = table.getDouble("STOP_MOVING_THERSHOLD");
 
             if (STOP_MOVING_THERSHOLDToml.isEmpty()) {
-                System.err.println("Error: VisionTeleopCommand cannot find toml property STOP_MOVING_THERSHOLD");
+                System.err.println("Error: Vison cannot find toml property STOP_MOVING_THERSHOLD");
                 throw new Error("error");
             }
 
@@ -242,7 +242,7 @@ public class Vision extends SubsystemBase {
             Optional<Double> STAFE_THERSHOLDToml = table.getDouble("STAFE_THERSHOLD");
 
             if (STAFE_THERSHOLDToml.isEmpty()) {
-                System.err.println("Error: VisionTeleopCommand cannot find toml property STAFE_THERSHOLD");
+                System.err.println("Error: Vison cannot find toml property STAFE_THERSHOLD");
                 throw new Error("error");
             }
 
@@ -254,7 +254,7 @@ public class Vision extends SubsystemBase {
             Optional<Double> TURNING_THERSHOLDToml = table.getDouble("TURNING_THERSHOLD");
 
             if (TURNING_THERSHOLDToml.isEmpty()) {
-                System.err.println("Error: VisionTeleopCommand cannot find toml property TURNING_THERSHOLD");
+                System.err.println("Error: Vison cannot find toml property TURNING_THERSHOLD");
                 throw new Error("error");
             }
 
@@ -266,11 +266,49 @@ public class Vision extends SubsystemBase {
             Optional<Double> LIMELIGHT_INIT_FAILED_TIMEToml = table.getDouble("LIMELIGHT_INIT_FAILED_TIME");
 
             if (LIMELIGHT_INIT_FAILED_TIMEToml.isEmpty()) {
-                System.err.println("Error: VisionTeleopCommand cannot find toml property LIMELIGHT_INIT_FAILED_TIME");
+                System.err.println("Error: Vison cannot find toml property LIMELIGHT_INIT_FAILED_TIME");
                 throw new Error("error");
             }
 
             mConfig.LIMELIGHT_INIT_FAILED_TIME = LIMELIGHT_INIT_FAILED_TIMEToml.get();
+
+        }
+
+        // offsets
+
+        {
+            Optional<Double> LEFT_OFFSETToml = table.getDouble("LEFT_OFFSET");
+
+            if (LEFT_OFFSETToml.isEmpty()) {
+                System.err.println("Error: Vison cannot find toml property LEFT_OFFSET");
+                throw new Error("error");
+            }
+
+            mConfig.LEFT_OFFSET = LEFT_OFFSETToml.get();
+            System.out.println("left offset: " + mConfig.LEFT_OFFSET);
+        }
+
+        {
+            Optional<Double> RIGHT_OFFSETToml = table.getDouble("RIGHT_OFFSET");
+
+            if (RIGHT_OFFSETToml.isEmpty()) {
+                System.err.println("Error: Vison cannot find toml property RIGHT_OFFSET");
+                throw new Error("error");
+            }
+
+            mConfig.RIGHT_OFFSET = RIGHT_OFFSETToml.get();
+
+        }
+
+        {
+            Optional<Double> CENTER_OFFSETToml = table.getDouble("CENTER_OFFSET");
+
+            if (CENTER_OFFSETToml.isEmpty()) {
+                System.err.println("Error: Vision cannot find toml property CENTER_OFFSET");
+                throw new Error("error");
+            }
+
+            mConfig.CENTER_OFFSET = CENTER_OFFSETToml.get();
 
         }
 
@@ -406,6 +444,13 @@ public class Vision extends SubsystemBase {
         return mConfig.getCopy();
     }
 
+    // Alignment enum
+    public static enum Alignment {
+        LEFT,
+        RIGHT,
+        CENTER;
+    }
+
 
     // data for other subsystems to use this class has:
     // turningDistance (double)
@@ -450,6 +495,25 @@ public class Vision extends SubsystemBase {
         public double STAFE_THERSHOLD;
         public double TURNING_THERSHOLD;
 
+        public double LEFT_OFFSET;
+        public double RIGHT_OFFSET;
+        public double CENTER_OFFSET;
+
+        // get offset
+        public double getOffset(Alignment alignment) {
+            switch (alignment) {
+                case LEFT:
+                    return LEFT_OFFSET;
+                case RIGHT:
+                    return RIGHT_OFFSET;
+                case CENTER:
+                    return CENTER_OFFSET;
+            
+                default:
+                    return 0.0;
+            }
+        }
+
         public Config getCopy() {
             Config config = new Config();
     
@@ -473,11 +537,15 @@ public class Vision extends SubsystemBase {
             config.kMaxAngularSpeed = this.kMaxAngularSpeed;
             config.kMinMoveSpeedLinear = this.kMinMoveSpeedLinear;
             config.kMinMoveSpeedAngular = this.kMinMoveSpeedAngular;
-    
+            
+            // muliplier
             config.kDistanceMultiplierForwards = this.kDistanceMultiplierForwards;
             config.kDistanceMultiplierStafing = this.kDistanceMultiplierStafing;
             config.kDistanceMultiplierTurning = this.kDistanceMultiplierTurning;
-    
+            
+            config.CENTER_OFFSET = this.CENTER_OFFSET;
+            config.LEFT_OFFSET = this.LEFT_OFFSET;
+            config.RIGHT_OFFSET = this.RIGHT_OFFSET;
 
     
             return config;

@@ -15,9 +15,9 @@ import frc.robot.subsystems.vision.*;
 
 public class VisionTeleopCommand extends Command {
 
-    // config
+    // vars
 
-    public double mOffset;
+    private double mOffset;
 
     private final Vision kVisionSubsystem;
     private final Drivetrain kDrivetrain;
@@ -51,6 +51,10 @@ public class VisionTeleopCommand extends Command {
         mConfig = kVisionSubsystem.getConfigCopy();
 
         addRequirements(kDrivetrain, kVisionSubsystem);
+    }
+
+    public void setOffset(Vision.Alignment alignment) {
+        mOffset = mConfig.getOffset(alignment);
     }
 
     @Override
@@ -99,6 +103,7 @@ public class VisionTeleopCommand extends Command {
         // init teleop
 
         kVisionSubsystem.setFilter(-1);
+
 
         // System.out.println("[drive progress] " + Boolean.toString(mIsDoneMoving) + ",
         // " + Boolean.toString(mIsDoneStafing));
@@ -200,11 +205,11 @@ public class VisionTeleopCommand extends Command {
     public boolean isFinished() {
         boolean limelightInitFailed = (kTimer.get() >= mConfig.LIMELIGHT_INIT_FAILED_TIME && !mDoneInitTeleop);
 
-        if (mIsDoneMoving && !mIsDoneStafing) {
-            System.out.println("stafing is holding us up");
-        } else if (mIsDoneStafing && !mIsDoneMoving) {
-            System.out.println("moving is holding us up");
-        }
+        // if (mIsDoneMoving && !mIsDoneStafing) {
+        //     System.out.println("stafing is holding us up");
+        // } else if (mIsDoneStafing && !mIsDoneMoving) {
+        //     System.out.println("moving is holding us up");
+        // }
 
         if (limelightInitFailed) {
             System.out.println("Limelight init failed");
