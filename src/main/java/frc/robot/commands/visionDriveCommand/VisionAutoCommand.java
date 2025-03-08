@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.*;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.*;
@@ -22,11 +23,17 @@ public class VisionAutoCommand extends Command {
     private final Drivetrain kDrivetrain;
     private final Time kRobotPeriod;
 
+    private final Timer kTimer = new Timer();
+
     private boolean mIsDoneStafing = false;
     private boolean mIsDoneMoving = false;
+
     private boolean mDoneAutoInit = false;
 
     private int mTargetDriveAprilTagId;
+
+    private final int kTargetTag1;
+    private final int kTargetTag2;
 
     private AngularVelocity mAngularVelocity = Units.RadiansPerSecond.zero();
     private LinearVelocity mStafeVelocity = Units.MetersPerSecond.zero();
@@ -45,6 +52,9 @@ public class VisionAutoCommand extends Command {
         kDrivetrain = drivetrain;
         kRobotPeriod = period;
 
+        kTargetTag1 = targetTagId1;
+        kTargetTag2 = targetTagId2;
+
         mConfig = kVisionSubsystem.getConfigCopy();
 
         addRequirements(kDrivetrain, kVisionSubsystem);
@@ -60,12 +70,33 @@ public class VisionAutoCommand extends Command {
         mIsDoneMoving = false;
         mIsDoneStafing = false;
 
+        mDoneAutoInit = false;
+
+        // reset the timer
+        kTimer.reset();
+        kTimer.start();
+
     }
 
     @Override
     public void execute() {
+        
+        if (!mDoneAutoInit) {
 
-        if (mTargetDriveAprilTagId == -1)
+            if ((int) kVisionSubsystem.mLimelightTable.getEntry("priorityid").getInteger(-1) == -1
+                    && kVisionSubsystem.getTagId() != -1 && (kVisionSubsystem.getTagId() == kTargetTag1 || kVisionSubsystem.getTagId() == kTargetTag2)) {
+
+                mDoneAutoInit = true;
+
+                kVisionSubsystem.setFilter(kVisionSubsystem.getTagId());
+
+                mTargetDriveAprilTagId = kVisionSubsystem.getTagId();
+
+                System.out.println("Going to: " + kVisionSubsystem.getTagId());
+            }
+        }
+
+        if (mTargetDriveAprilTagId <= 0 || !mDoneAutoInit)
             return;
 
         Vision.VisionTagData data = kVisionSubsystem.robotDriveToAprilTag(mTargetDriveAprilTagId, mOffset);
@@ -180,15 +211,21 @@ public class VisionAutoCommand extends Command {
 
     @Override
     public boolean isFinished() {
+        boolean limelightInitFailed = (kTimer.get() >= mConfig.LIMELIGHT_INIT_FAILED_TIME && !mDoneAutoInit);
+
         // if (mIsDoneMoving && !mIsDoneStafing) {
         //     System.out.println("stafing is holding us up");
         // } else if (mIsDoneStafing && !mIsDoneMoving) {
         //     System.out.println("moving is holding us up");
         // }
 
-        if ((mIsDoneStafing && mIsDoneMoving)) {
+        if (limelightInitFailed) {
+            System.out.println("Limelight init failed");
+            return true;
 
-            System.out.println("Done");
+        } else if ((mIsDoneStafing && mIsDoneMoving)) {
+
+            System.out.println("Done: " + kTimer.get());
 
             return true;
         }

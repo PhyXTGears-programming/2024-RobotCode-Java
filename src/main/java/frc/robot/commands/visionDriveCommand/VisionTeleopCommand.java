@@ -87,7 +87,7 @@ public class VisionTeleopCommand extends Command {
             }
         }
 
-        if (mTargetDriveAprilTagId == -1 || !mDoneInitTeleop)
+        if (mTargetDriveAprilTagId <= 0 || !mDoneInitTeleop)
             return;
 
         Vision.VisionTagData data = kVisionSubsystem.robotDriveToAprilTag(mTargetDriveAprilTagId, mOffset);

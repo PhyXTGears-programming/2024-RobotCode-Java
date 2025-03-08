@@ -80,7 +80,7 @@ public class Robot extends TimedRobot {
         }
 
         kVisionSubsystem = new Vision(table.get());
-        kVisionAutoCommand = new VisionAutoCommand(kVisionSubsystem, kDrivetrain, 10, Units.Milliseconds.of(20.0));
+        kVisionAutoCommand = new VisionAutoCommand(kVisionSubsystem, kDrivetrain, 10, 7, Units.Milliseconds.of(20.0));
         mVisionTeleopCommand = new VisionTeleopCommand(kVisionSubsystem, kDrivetrain, -1, Units.Milliseconds.of(20.0));
         
         kDriveTeleopCommand = new DriveTeleopCommand(kDrivetrain, kDriveController, Units.Milliseconds.of(20.0));
